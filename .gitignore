@@ -1,0 +1,9 @@
+# compiled files #
+*.o
+*.so
+zabbix.map
+
+# Doxygen output folders #
+latex/
+html/
+
