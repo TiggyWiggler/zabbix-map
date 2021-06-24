@@ -1,7 +1,7 @@
 # compiled files #
 *.o
 *.so
-zabbix.map
+zabbix-map
 
 # Doxygen output folders #
 latex/
