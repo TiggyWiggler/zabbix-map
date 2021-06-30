@@ -1,0 +1,790 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.2</version>
+    <date>2021-06-30T10:04:50Z</date>
+    <groups>
+        <group>
+            <name>Templates/L2DM/LLDP</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>LLDP - Local Common</template>
+            <name>LLDP - Local Common</name>
+            <description>Created by Craig Moore. Retrieve local common data useful to LLDP topology mapping such as chassis ID</description>
+            <groups>
+                <group>
+                    <name>Templates/L2DM/LLDP</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>LLDP - Local Common</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Chassis Id</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocChassisId.0</snmp_oid>
+                    <key>SNMP-Chassis-Id</key>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>LLDP - Local Common</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Chassis Id Type</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocChassisIdSubtype.0</snmp_oid>
+                    <key>SNMP-Chassis-Id-Type</key>
+                    <applications>
+                        <application>
+                            <name>LLDP - Local Common</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template_LLDP_General_freeversion_1.0</template>
+            <name>Template LLDP - General</name>
+            <description>LLDP Module Temaplate type1-1 version 1.1 (20190516)
+
+Conditions
+ - Use with LLDP module installed
+ - Use with LLDP MIB installed
+
+Specification:
+ - Use &quot;ifName&quot; as item name
+ - Use &quot;ifName&quot; as application name</description>
+            <groups>
+                <group>
+                    <name>Templates/L2DM/LLDP</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Port Management (LLDP) - Host Info</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>[Topology] Host Descr</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocSysDesc.0</snmp_oid>
+                    <key>lldp.loc.sys.desc</key>
+                    <delay>86400</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <applications>
+                        <application>
+                            <name>Port Management (LLDP) - Host Info</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>[Topology] Local Host Name</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocSysName.0</snmp_oid>
+                    <key>lldp.loc.sys.name</key>
+                    <delay>86400</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Port Management (LLDP) - Host Info</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>if_discovery</name>
+                    <type>SIMPLE</type>
+                    <key>lldp.discovery[{HOST.CONN},{$SNMP_COMMUNITY},interface]</key>
+                    <delay>3600</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#IF_TYPE}</macro>
+                                <value>^(6|62|69|117)$</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Port Descr</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifDescr.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.descr[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Link Speed</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifSpeed.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.ifSpeed[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <units>bps</units>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Port Index Num</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifIndex.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.index[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Port MAC Address</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifPhysAddress.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.mac[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Port Name</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifName.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.name[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}
+{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Link Status</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifOperStatus.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.opstatus[{#PORT_NUM}]</key>
+                            <delay>300</delay>
+                            <history>30d</history>
+                            <trends>0</trends>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>SNMP interface status (ifOperStatus)</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}=2</expression>
+                                    <name>[Port - {#PORT_NAME}] - Link Down</name>
+                                    <status>DISABLED</status>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - Port Type</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifType.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.type[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>SNMP ifType</name>
+                            </valuemap>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>lldp_discovery_remote</name>
+                    <type>SIMPLE</type>
+                    <key>lldp.discovery[{HOST.CONN},{$SNMP_COMMUNITY},remote]</key>
+                    <delay>600</delay>
+                    <lifetime>0</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Chassis Info</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.chassis.id[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTNAME_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Chassis Info Type</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.chassis.type[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTTYPE_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>LLDP LldpPortIdSubtype</name>
+                            </valuemap>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Interface Descr</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.desc[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Interface Info</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.id[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTNAME_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Interface Info Type</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.type[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTTYPE_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>LLDP LldpPortIdSubtype</name>
+                            </valuemap>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Host Descr</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.sys.desc[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - List of connetct to Host Descr</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Host</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.sysname[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_SYSNAME_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - List of connetct to Host Name</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+        <template>
+            <template>Template_LLDP_IndexNum_freeversion_1.0</template>
+            <name>Template LLDP - IndexNum</name>
+            <description>LLDP Module Temaplate type1-2 version 1.1 (20190516)
+
+Conditions
+ - Use with LLDP module installed
+ - Use with LLDP MIB installed
+
+Specification:
+ - Use &quot;ifIndex&quot; as item name
+ - Use &quot;ifIndex&quot; as application name</description>
+            <groups>
+                <group>
+                    <name>Templates/L2DM/LLDP</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Port Management (LLDP) - Host Info</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>[Topology] Host Descr</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocSysDesc.0</snmp_oid>
+                    <key>lldp.loc.sys.desc</key>
+                    <delay>86400</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <applications>
+                        <application>
+                            <name>Port Management (LLDP) - Host Info</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>[Topology] Local Host Name</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>LLDP-MIB::lldpLocSysName.0</snmp_oid>
+                    <key>lldp.loc.sys.name</key>
+                    <delay>86400</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Port Management (LLDP) - Host Info</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>if_discovery</name>
+                    <type>SIMPLE</type>
+                    <key>lldp.discovery[{HOST.CONN},{$SNMP_COMMUNITY},interface]</key>
+                    <delay>3600</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#IF_TYPE}</macro>
+                                <value>^(6|62|69|117)$</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Port Descr</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifDescr.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.descr[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Link Speed</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifSpeed.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.ifSpeed[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <units>bps</units>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Port Index Num</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifIndex.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.index[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <status>DISABLED</status>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Port MAC Address</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifPhysAddress.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.mac[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Port Name</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifName.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.name[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}
+{#PORT_NAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Link Status</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifOperStatus.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.opstatus[{#PORT_NUM}]</key>
+                            <delay>300</delay>
+                            <history>30d</history>
+                            <trends>0</trends>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>SNMP interface status (ifOperStatus)</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}=2</expression>
+                                    <name>[Port - {#PORT_NUM}] - Link Down</name>
+                                    <status>DISABLED</status>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - Port Type</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>ifType.{#PORT_NUM}</snmp_oid>
+                            <key>lldp.loc.if.type[{#PORT_NUM}]</key>
+                            <delay>3600</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>SNMP ifType</name>
+                            </valuemap>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>lldp_discovery_remote</name>
+                    <type>SIMPLE</type>
+                    <key>lldp.discovery[{HOST.CONN},{$SNMP_COMMUNITY},remote]</key>
+                    <delay>600</delay>
+                    <lifetime>0</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - [ Connect to ] Interface Descr</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.desc[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - [ Connect to ] Interface Info</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.id[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTNAME_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - [ Connect to ] Interface Info Type</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.port.type[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_PORTTYPE_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <valuemap>
+                                <name>LLDP LldpPortIdSubtype</name>
+                            </valuemap>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - [ Connect to ] Host Descr</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.sys.desc[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - List of connetct to Host Descr</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[Port - {#PORT_NUM}] - [ Connect to ] Host</name>
+                            <type>SIMPLE</type>
+                            <key>lldp.rem.sysname[{HOST.CONN},{$SNMP_COMMUNITY},{#PORT_NUM},{#REM_IDX},{$FIXED_SYSNAME_{#PORT_NUM}}]</key>
+                            <delay>300</delay>
+                            <history>10d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <description>{#PORT_NUM}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - List of connetct to Host Name</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>Port Management (LLDP) - Port {#PORT_NUM}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>LLDP LldpPortIdSubtype</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>interfaceAlias</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>portComponent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>macAddress</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>networkAddress</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>interfaceName</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>agentCircuitId</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>local</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>SNMP ifType</name>
+            <mappings>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>ethernetCsmacd</newvalue>
+                </mapping>
+                <mapping>
+                    <value>20</value>
+                    <newvalue>basicISDN</newvalue>
+                </mapping>
+                <mapping>
+                    <value>23</value>
+                    <newvalue>ppp</newvalue>
+                </mapping>
+                <mapping>
+                    <value>24</value>
+                    <newvalue>softwareLoopback</newvalue>
+                </mapping>
+                <mapping>
+                    <value>54</value>
+                    <newvalue>propMultiplexor</newvalue>
+                </mapping>
+                <mapping>
+                    <value>62</value>
+                    <newvalue>fastEther</newvalue>
+                </mapping>
+                <mapping>
+                    <value>69</value>
+                    <newvalue>fastEtherFX</newvalue>
+                </mapping>
+                <mapping>
+                    <value>117</value>
+                    <newvalue>gigabitEthernet</newvalue>
+                </mapping>
+                <mapping>
+                    <value>131</value>
+                    <newvalue>tunnel</newvalue>
+                </mapping>
+                <mapping>
+                    <value>161</value>
+                    <newvalue>ieee8023adLag</newvalue>
+                </mapping>
+                <mapping>
+                    <value>258</value>
+                    <newvalue>vmwareVirtualNic</newvalue>
+                </mapping>
+                <mapping>
+                    <value>272</value>
+                    <newvalue>vmwareNicTeam</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>SNMP interface status (ifOperStatus)</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>up</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>testing</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>dormant</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>notPresent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>7</value>
+                    <newvalue>lowerLayerDown</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

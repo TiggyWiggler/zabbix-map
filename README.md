@@ -4,7 +4,7 @@ Zabbix Map is a network topology mapper for Zabbix which uses Zabbix data direct
 
 Data within Zabbix is used as the source for the map structure and the result are output to a Zabbix Map.
 
-Note: This is my first ever C project. I am NOT an expert and I make no claim that the code contained in this project is optimised or expertly written. Assume this code was built by an idiot barely capable or bashing two rocks together and we should get on fine.
+Note: This is my first ever C project. I am NOT an expert and I make no claim that the code contained in this project is optimised or expertly written. Assume this code was built by an idiot barely capable of bashing two rocks together and we should get on fine.
 
 ## Prerequisites
  - curl
@@ -19,6 +19,8 @@ Remember to respect the original copyright for the The L2 Discovery Module for L
 
 ## L2 Discovery Module for LLDP Modifications
 The  L2 Discovery Module for LLDP project requires the following modification before it can be used with the Zabbix Map.
+
+### lldp_get.c
 
 Within the section ‘Module Keys’ starting at line 122, add the following two keys:
 ```
@@ -74,13 +76,52 @@ CHK_OID(REM_CHASSIS_TYPE_OID, RES_TYPE_INT, DUMP_NORMAL);
 CHK_OID(REM_CHASSIS_ID_OID, RES_TYPE_STR, DUMP_WITH_MAC);
 ```
 
+### LLDP Templates
+Exported copies of The templates listed below are included in the source files of this project. It should not be necessary to manually modify the templates as you can use the existing exports provided, but directions on how to modify templates as required is included for completeness and in case direct import is not an option for you or your organisation.
+
+See ~/L2DM-LLDP/data/templates/zbx_export_templates.xml
+
+Both templates “LLDP - Local Common” and “Template LLDP – General” need to be applied to any host that you wish to map as all of the data pulled by these templates is used by the mapping application to ascertain the relationship between the hosts. Personally I have a discovery action that adds these two templates to any host that is discovered.
+
+“Template LLDP – IndexNum” is provided in the “L2 Discovery Module for LLDP” project but is ignored for our benefit.
+
+#### Template LLDP – General
+within Template LLDP – General there are two discovery rules:
+1. 	if_discovery
+2.	lldp_discovery_remote
+
+within lldp_discovery_remote there are seven item prototypes. In each of the seven item prototypes update the name to include “[MSAP {#REM_IDX}]”. For example:
+[Port - {#PORT_NAME}] - [MSAP {#REM_IDX}] - [ Connect to ] Chassis Info
+
+#### Template LLDP – Local Common
+This is a new template not already existing within the “L2 Discovery Module for LLDP” project. It has two items in it that are configured as follows:
+First item.
+Name: “chassis Id”
+Key:	“SNMP-Chassis-Id”
+Type:	“SNMP agent”
+SNMP OID:	“LLDP-MIB::lldpLocChassisId.0”
+Type:	“Text”
+Applications: 	“LLDP-Local-Common” <- Create this application if not already existing.
+
+Second item:
+Name:	“chassis Id type”
+Key:	“SNMP-Chassis-Id-Type”
+Type:	“SNMP agent”
+SNMP OID:	“LLDP-MIB::lldpLocChassisIdSubtype.0”
+Type:	“Numeric (unsigned)”
+Applications:	“LLDP-Local-Common” <- Create this application if not already existing.
+
+
+## Building
+Update the references inside the makefile to your local copy of curl and json-c and then `make all` from within the root of the project. 
+
 ## Usage
 
 usage: zabbix-map [OPTION]…
 
 option should be followed by option value if applicable. Use double quotes if value includes spaces.
 
-example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin -p password1
+example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin -p password1`
 
 <table>
 	<thead>
