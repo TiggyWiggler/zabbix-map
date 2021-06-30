@@ -81,14 +81,18 @@ option should be followed by option value if applicable. Use double quotes if va
 example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin -p password1
 
 <table>
-	<th>
-		<td>Option</td>
-		<td>Description</td>
-	</th>
-	<tr>
-		<td>-map</td>
-		<td>name of the map in Zabbix. Will overwrite if existing.</td>
-	</tr>
+	<thead>
+		<tr>
+			<th>Option</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>-map</td>
+			<td>name of the map in Zabbix. Will overwrite if existing.</td>
+		</tr>
+	</tbody>
 </table>
 
 |Option	|Description|
