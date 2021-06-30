@@ -119,7 +119,7 @@ example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin
 			generations: order by number levels (generations) below subject node.<br/>
 			For any order value suffix 'Desc' to reverse order. <br/>
 			Chain multiple orders with spaces. <br/>
-			example: `-orderby "descendants childrenDesc"`</td>
+			example: <code>-orderby "descendants childrenDesc"</code></td>
 		</tr>
 		<tr>	
 			<td></td>
