@@ -676,6 +676,7 @@ void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpa
     struct tree *t;
     f->treeCount = 0;
 
+
     // Convert the hosts and links taken from Zabbix into a generalised forest (collection of tree structures)
     f = hostLinkToForest(f, hostsLinks);
 

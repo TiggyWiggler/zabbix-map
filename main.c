@@ -35,58 +35,8 @@ struct methodCol
 
 void showHelp(void);
 struct padding parsePadding(char *s);
-struct methodCol parseSorts(char *s);
+void parseSorts(char *s ,struct methodCol mc);
 void parseSpacing(char *s, double spaces[2]);
-
-/*
-void test()
-{
-    int authKey = zconnAuth("Admin", "zabbix");
-    printf((authKey == 0) ? "Authentication failed.\n" : "Authentication succeeded\n");
-
-    struct hostLink hl;
-    struct padding pads = {.bottom = 50, .left = 50, .right = 50, .top = 50};
-    enum sortMethods sorts[] = {descendantsDesc};
-    char *mapName = "Craigs map";
-
-    hl.hosts = zconnGetHostsFromAPI("hosts.jarray");
-    hl.links.count = 0;
-
-    if (hl.hosts.count > 0)
-    {
-        hl = *(mapHosts(&hl));
-        double nodeXSpace = 100.0;
-        double nodeYSpace = 100.0;
-
-        layoutHosts(&hl, nodeXSpace, nodeYSpace, pads, sorts, 1);
-
-        // find the overall size of the map. It will be origined at 0,0 so we just need to max x and y coords.
-        int i;
-        double xMax = 0.0, yMax = 0.0;
-        for (i = 0; i < hl.hosts.count; i++)
-        {
-            if (hl.hosts.hosts[i].xPos > xMax)
-                xMax = hl.hosts.hosts[i].xPos;
-            if (hl.hosts.hosts[i].yPos > yMax)
-                yMax = hl.hosts.hosts[i].yPos;
-        }
-
-        xMax += pads.right;
-        yMax += pads.bottom;
-
-        // Delete the map if it currently exists.
-        zconnDeleteMapByName(mapName);
-
-        // Write the map into Zabbix
-        createMap(&hl, mapName, xMax, yMax);
-
-        printHosts(&hl.hosts);
-        printLinks(&hl.links);
-    }
-
-    freeHostCol(&hl.hosts);
-    free(hl.links.links);
-}*/
 
 int main(int argc, char *argv[])
 {
@@ -157,8 +107,12 @@ int main(int argc, char *argv[])
         parseSpacing(nodeSpace, spacing);
         double nodeXSpace = spacing[0], nodeYSpace = spacing[1]; // Spacing between nodes in a tree (objects in a Zabbix map)
         struct padding pads = parsePadding(padStr);
-        struct methodCol sorts = parseSorts(sortStr);
-        int sortn = 0; // number of sorts
+
+        struct methodCol mc;
+        mc.n = 0;
+        mc.s = 5;
+        mc.sm = malloc(mc.s * sizeof mc.sm); // allocate space to the size parameter.
+        parseSorts(sortStr, mc);
 
         struct hostLink hl;
         hl.links.count = 0;
@@ -182,16 +136,21 @@ int main(int argc, char *argv[])
 
         if (hl.hosts.count > 0)
         {
-            layoutHosts(&hl, nodeXSpace, nodeYSpace, pads, sorts.sm, sorts.n);
+            struct hostLink *hlPtr = &hl;
+
+            if (hlPtr->hosts.count > 0)
+                hlPtr = mapHosts(hlPtr);
+
+            layoutHosts(hlPtr, nodeXSpace, nodeYSpace, pads, mc.sm, mc.n);
             // find the overall size of the map. It will be origined at 0,0 so we just need to max x and y coords.
             int i;
             double xMax = 0.0, yMax = 0.0;
-            for (i = 0; i < hl.hosts.count; i++)
+            for (i = 0; i < hlPtr->hosts.count; i++)
             {
-                if (hl.hosts.hosts[i].xPos > xMax)
-                    xMax = hl.hosts.hosts[i].xPos;
-                if (hl.hosts.hosts[i].yPos > yMax)
-                    yMax = hl.hosts.hosts[i].yPos;
+                if (hlPtr->hosts.hosts[i].xPos > xMax)
+                    xMax = hlPtr->hosts.hosts[i].xPos;
+                if (hlPtr->hosts.hosts[i].yPos > yMax)
+                    yMax = hlPtr->hosts.hosts[i].yPos;
             }
 
             // Add padding on to the overall size.
@@ -202,12 +161,19 @@ int main(int argc, char *argv[])
             zconnDeleteMapByName(map);
 
             // Write the map into Zabbix
-            createMap(&hl, map, xMax, yMax);
+            createMap(hlPtr, map, xMax, yMax);
+
+            freeHostCol(&(hlPtr->hosts));
+            if (hlPtr->links.count > 0)
+                free(hlPtr->links.links);
+
+        }
+        else
+        {
+            freeHostCol(&hl.hosts);
         }
 
-        freeHostCol(&hl.hosts);
-        if (hl.links.count > 0)
-            free(hl.links.links);
+        free(mc.sm);
 
         if (strcmp(debug, "true") == 0)
         {
@@ -266,12 +232,9 @@ struct padding parsePadding(char *s)
  * Convert string containing sort information into an array of sort methods
  * @param [in] s        string containing sort methods information.
  * */
-struct methodCol parseSorts(char *s)
+void parseSorts(char *s ,struct methodCol mc)
 {
-    struct methodCol mc;
-    mc.n = 0;
-    mc.s = 5;
-    mc.sm = malloc(mc.s * sizeof mc.sm); // allocate space to the size parameter.
+   
     char delim[2] = ",";
     char *tok = strtok(s, delim);
     while (tok != NULL)
@@ -284,7 +247,6 @@ struct methodCol parseSorts(char *s)
             if (tmpPtr)
             {
                 fprintf(stderr, "Out of memory attempting to add sort methods to memory");
-                return mc;
             }
             mc.sm = tmpPtr;
         }
@@ -316,7 +278,6 @@ struct methodCol parseSorts(char *s)
 
         tok = strtok(NULL, delim);
     }
-    return mc;
 }
 
 /**
@@ -330,7 +291,7 @@ void parseSpacing(char *s, double spaces[2])
     char *tok;
     int i = 0;
     tok = strtok(s, delim);
-    spaces[0] = 0.0;        // Ensure always return something
+    spaces[0] = 0.0; // Ensure always return something
     spaces[1] = 0.0;
     while (tok != NULL)
     {
