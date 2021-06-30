@@ -7,3 +7,10 @@ zabbix-map
 latex/
 html/
 
+# cache files #
+hosts.jarray
+maps.jarray
+images.jarray
+
+# IDE specific#
+.vscode/

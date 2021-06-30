@@ -1,0 +1,34 @@
+
+                Layer 2 Discovery Module for LLDP
+                      Introduction document
+                      (Version 1.1, May 2019)
+
+  What is it?
+  -----------
+
+  The LLDP monitoring module provides a function to read adjacent device 
+  information of LLDP held by network equipment from Zabbix using SNMP.
+  
+  
+  The Latest Version
+  ------------------
+
+  Details of the latest version can be found in the Zabbix Share.
+  Open the download page under https://share.zabbix.com/network_devices/l2-discovery-module-for-lldp
+
+  What are these files
+  --------------------
+  
+  These files do not represent the full version of Layer 2 Discovery Module for LLDP, but instead the files that need to be modified within the main base project for it to be compatible with zabbix-map. Layer 2 Discovery Module for LLDP is a prerequisite for zabbix-map to work.
+  
+  Licensing
+  ---------
+
+  Please see the file called COPYING.
+
+
+  Installation
+  ------------
+  
+  Please download the full copy of Layer 2 Discovery Module for LLDP and read the instructions therein.
+

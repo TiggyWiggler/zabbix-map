@@ -22,6 +22,12 @@ The  L2 Discovery Module for LLDP project requires the following modification be
 
 ### lldp_get.c
 
+I have included a modified copy of the lldp_get.c source code within the source code of this here zabbix-map project. You will need to get a copy of the L2 Discovery Module for LLDP [Found here](https://share.zabbix.com/network_devices/l2-discovery-module-for-lldp) if you wish to copy in the pre-modified code that I have included.
+
+See ~/L2DM-LLDP/source/modules/lldp_get.c
+
+In case you do not want to use this approach (or cannot) and instead wish to directly modify the lldp_get.c code directly from the  L2 Discovery Module for LLDP project, the required modifications and changes are shown herein.
+
 Within the section ‘Module Keys’ starting at line 122, add the following two keys:
 ```
 #define MODULE_KEY_REM_CHASSIS_TYPE	"lldp.rem.chassis.type"
