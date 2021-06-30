@@ -34,6 +34,12 @@
 #include "zdata.h"
 
 /**
+ * Sets the API end point to be used by all future API calls.
+ * @param [in] ep       end point name. e.g. "http://localhost/api_jsonrpc.php" which is also the default value
+ * */
+void setEndpoint(char *ep);
+
+/**
  * Authenticates a user against given credentials.
  * @param[in]   user    The user name.
  * @param[in]   pw      The password in clear text.

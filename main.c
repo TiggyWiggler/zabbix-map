@@ -35,7 +35,7 @@ struct methodCol
 
 void showHelp(void);
 struct padding parsePadding(char *s);
-void parseSorts(char *s ,struct methodCol mc);
+void parseSorts(char *s, struct methodCol mc);
 void parseSpacing(char *s, double spaces[2]);
 
 int main(int argc, char *argv[])
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     char user[120] = "Admin";
     char pw[120] = "zabbix";
     char debug[6] = "false";
+    char ep[256] = ""; // API End Point
     char *cptr = NULL;
     int h = 0; // show help.
     int i;
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
                 cptr = &pw[0];
             else if (strcmp(argv[i], "-debug") == 0)
                 cptr = &debug[0];
+            else if (strcmp(argv[i], "-ep") == 0)
+                cptr = &ep[0];
             else if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "--h") == 0) || (strcmp(argv[i], "--?") == 0) || (strcmp(argv[i], "--help") == 0))
                 // help required
                 h = 1;
@@ -92,10 +95,27 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (strcmp(debug, "true") == 0)
+    {
+        printf("API End Point: %s\n", ep);
+        printf("Map Name: %s\n", map);
+        printf("IP: %s\n", ip);
+        printf("Source: %s\n", src);
+        printf("Cache: %s\n", cache);
+        printf("Order By: %s\n", sortStr);
+        printf("Padding: %s\n", padStr);
+        printf("Node Spacing: %s\n", nodeSpace);
+        printf("Username: %s\n", user);
+        printf("Password: %s\n", pw);
+    }
+
     if (h)
         showHelp();
     else
     {
+        if (strlen(ep) > 0)
+            setEndpoint(ep); // Change API endpoint if supplied. Otherwise default value used.
+
         int authKey = zconnAuth(user, pw);
         if (authKey == 0)
         {
@@ -166,7 +186,6 @@ int main(int argc, char *argv[])
             freeHostCol(&(hlPtr->hosts));
             if (hlPtr->links.count > 0)
                 free(hlPtr->links.links);
-
         }
         else
         {
@@ -174,19 +193,6 @@ int main(int argc, char *argv[])
         }
 
         free(mc.sm);
-
-        if (strcmp(debug, "true") == 0)
-        {
-            printf("Map Name: %s\n", map);
-            printf("IP: %s\n", ip);
-            printf("Source: %s\n", src);
-            printf("Cache: %s\n", cache);
-            printf("Order By: %s\n", sortStr);
-            printf("Padding: %s\n", padStr);
-            printf("Node Spacing: %s\n", nodeSpace);
-            printf("Username: %s\n", user);
-            printf("Password: %s\n", pw);
-        }
     }
 
     return 0;
@@ -232,9 +238,9 @@ struct padding parsePadding(char *s)
  * Convert string containing sort information into an array of sort methods
  * @param [in] s        string containing sort methods information.
  * */
-void parseSorts(char *s ,struct methodCol mc)
+void parseSorts(char *s, struct methodCol mc)
 {
-   
+
     char delim[2] = ",";
     char *tok = strtok(s, delim);
     while (tok != NULL)
@@ -309,6 +315,7 @@ void showHelp()
     printf("usage: zabbix-map [OPTION]...\n");
     printf("option should be followed by option value if applicable. Use double quotes if value includes spaces.\n");
     printf("example: zabbix-map -map \"test map\" -ip \"192.168.4.0\\24, 192.168.4.101\" -u admin -p password1\n\n");
+    printf(" -ep \t\t\tAPI End Point. default http://localhost/api_jsonrpc.php\n");
     printf(" -map \t\t\tname of the map in Zabbix. Will overwrite if existing.\n");
     printf(" -ip\t\t\tIP address(es) of hosts to be included in the map.\n");
     printf("\t\t\tCan take multiple address or ranges. Must be comma seperated.\n");

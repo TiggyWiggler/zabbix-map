@@ -35,6 +35,8 @@ struct MemoryStruct
     size_t size;
 };
 
+static char endpoint[256] = "http://localhost/api_jsonrpc.php"; // API End point
+
 /**
  * callback method for CURL to capture response from server
  * */
@@ -58,6 +60,12 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     mem->memory[mem->size] = 0;
 
     return realsize;
+}
+
+// Set the end point to be used by the connection module.
+void setEndpoint(char *ep)
+{
+    strcpy(endpoint, ep);
 }
 
 int instr(char *tofind, char *findin, uint start)
@@ -154,7 +162,7 @@ json_object *zconnResp(char *method, json_object *params)
         /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/api_jsonrpc.php");
+        curl_easy_setopt(curl, CURLOPT_URL, endpoint);
 
         res = curl_easy_perform(curl); /* post away! */
 
@@ -782,10 +790,10 @@ int createMap(struct hostLink *hl, char *name, double w, double h)
 
     json_object *result = zconnResp("map.create", params);
     int mapId = 0;
-    if(result)
+    if (result)
     {
         json_object *jobjSysMapIds = json_object_object_get(result, "sysmapids");
-        json_object *jobjMapId = json_object_array_get_idx(jobjSysMapIds,0);
+        json_object *jobjMapId = json_object_array_get_idx(jobjSysMapIds, 0);
         mapId = json_object_get_int(jobjMapId);
     }
     json_object_put(result);
