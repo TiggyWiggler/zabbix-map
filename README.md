@@ -4,7 +4,7 @@ Zabbix Map is a network topology mapper for Zabbix which uses Zabbix data direct
 
 Data within Zabbix is used as the source for the map structure and the result are output to a Zabbix Map.
 
-##Prerequisites
+## Prerequisites
  - curl
  - json-c
  - L2 Discovery Module for LLDP [Found here](https://share.zabbix.com/network_devices/l2-discovery-module-for-lldp)
@@ -13,7 +13,7 @@ The L2 Discovery Module for LLDP needs to be modified slightly so that it retrie
 
 Remember to respect the original copyright for the The L2 Discovery Module for LLDP project in addition to this Zabbix Map project.
 
-##L2 Discovery Module for LLDP Modifications
+## L2 Discovery Module for LLDP Modifications
 The  L2 Discovery Module for LLDP project requires the following modification before it can be used with the Zabbix Map.
 
 
