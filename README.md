@@ -186,7 +186,7 @@ example: <code>-padding "100.0 50.0 100.0 50.0"</code></td>
 			<td>Username to be used for the connection to Zabbix server. Plaintext.</td>
 		</tr>
 		<tr>	
-			<td>-pw</td>
+			<td>-p</td>
 			<td>Password to be used for the given Zabbix server user. Plaintext.</td>
 		</tr>
 	</tbody>

@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
                 cptr = &nodeSpace[0];
             else if (strcmp(argv[i], "-u") == 0)
                 cptr = &user[0];
-            else if (strcmp(argv[i], "-pw") == 0)
+            else if (strcmp(argv[i], "-p") == 0)
                 cptr = &pw[0];
             else if (strcmp(argv[i], "-debug") == 0)
                 cptr = &debug[0];
@@ -339,5 +339,5 @@ void showHelp()
     printf("\t\t\tTwo values required if given. X axis first, Y axis second.\n");
     printf("\t\t\texample: -nodespace \"100.0, 50.0\"\n");
     printf(" -u\t\t\tUsername to be used for the connection to Zabbix server.\n");
-    printf(" -pw\t\t\tPassword to be used for the given Zabbix server user.\n");
+    printf(" -p\t\t\tPassword to be used for the given Zabbix server user.\n");
 }
