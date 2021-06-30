@@ -4,6 +4,8 @@ Zabbix Map is a network topology mapper for Zabbix which uses Zabbix data direct
 
 Data within Zabbix is used as the source for the map structure and the result are output to a Zabbix Map.
 
+Note: This is my first ever C project. I am NOT an expert and I make no claim that the code contained in this project is optimised or expertly written. Assume this code was built by an idiot barely capable or bashing two rocks together and we should get on fine.
+
 ## Prerequisites
  - curl
  - json-c
@@ -92,36 +94,57 @@ example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin
 			<td>-map</td>
 			<td>name of the map in Zabbix. Will overwrite if existing.</td>
 		</tr>
+		<tr>	
+			<td>-ip</td>
+			<td>Can take multiple address or ranges. Must be comma seperated.<br/>
+			Can have single addresses (E.g. 192.168.4.1)<br/>
+			or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)<br/>
+			or CIDR ranges (E.g. 192.168.4.0/24)</td>
+		</tr>
+		<tr>	
+			<td>-src</td>
+			<td>Data source for the map {api,file}.</br>
+			if taken from file then cache file is source.<br/>
+			if api then data comes from live data and cache file is used to store results.</td>
+		</tr>
+		<tr>	
+			<td>-cache</td>
+			<td>name of the cache file.</td>
+		</tr>
+		<tr>	
+			<td>-orderby</td>
+			<td>One or more order by values. Used to order host nodes.<br/>
+			descendants: order by number of descendants at all levels below subject node.<br/>
+			children: order by number of children at one level below subject node.<br/>
+			generations: order by number levels (generations) below subject node.<br/>
+			For any order value suffix 'Desc' to reverse order. <br/>
+			Chain multiple orders with spaces. <br/>
+			example: -orderby "descendants childrenDesc"</td>
+		</tr>
+		<tr>	
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>	
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>	
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>	
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>	
+			<td></td>
+			<td></td>
+		</tr>
 	</tbody>
 </table>
 
-|Option	|Description|
-|------	|-----------|
-|-map  	|name of the map in Zabbix. Will overwrite if existing.|
-|-ip		|IP address(es) of hosts to be included in the map. Can take multiple address or ranges. Must be comma seperated.
-		Can have single addresses (E.g. 192.168.4.1)
-		or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)|
-|-src		|Data source for the map {api,file}.|
-	
 
- -map 		
-
- -ip			IP address(es) of hosts to be included in the map.
-			Can take multiple address or ranges. Must be comma seperated.
-			Can have single addresses (E.g. 192.168.4.1)
-			or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)
-			or CIDR ranges (E.g. 192.168.4.0/24)
- -src			Data source for the map {api,file}.
-			if taken from file then cache file is source.
-			if api then data comes from live data and cache file is used to store results.
- -cache			name of the cache file.
- -orderby		One or more order by values. Used to order host nodes.
-			descendants: order by number of descendants at all levels below subject node.
-			children: order by number of children at one level below subject node.
-			generations: order by number levels (generations) below subject node.
-			For any order value suffix 'Desc' to reverse order. 
-			Chain multiple orders with spaces. 
-			example: -orderby "descendants childrenDesc"
  -padding		padding of each tree. Applied to sides counter clockwise from north position.
 			Four values required if given. example: -padding "100.0 50.0 100.0 50.0"
  -nodespace		Spacing between nodes within the map. Assumes nodes have zero size themselves.
@@ -129,4 +152,4 @@ example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin
 			example: -nodespace "100.0, 50.0"
  -u			Username to be used for the connection to Zabbix server.
  -pw			Password to be used for the given Zabbix server user.
-craig@ubuntu:~/Documents/Projects/c/zabbixMapGit/zabbix-map$ 
+
