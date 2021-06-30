@@ -83,13 +83,9 @@ example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin
 |Option	|Description|
 |------	|-----------|
 |-map  	|name of the map in Zabbix. Will overwrite if existing.|
-|-ip		|IP address(es) of hosts to be included in the map.
-
-			Can take multiple address or ranges. Must be comma seperated.
-
-			Can have single addresses (E.g. 192.168.4.1)
-
-			or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)|
+|-ip		|IP address(es) of hosts to be included in the map. Can take multiple address or ranges. Must be comma seperated.
+		Can have single addresses (E.g. 192.168.4.1)
+		or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)|
 |-src		|Data source for the map {api,file}.|
 	
 
