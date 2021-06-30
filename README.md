@@ -73,11 +73,28 @@ CHK_OID(REM_CHASSIS_ID_OID, RES_TYPE_STR, DUMP_WITH_MAC);
 ```
 
 ## Usage
-usage: zabbix-map [OPTION]...
+
+usage: zabbix-map [OPTION]…
+
 option should be followed by option value if applicable. Use double quotes if value includes spaces.
+
 example: zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin -p password1
 
- -map 			name of the map in Zabbix. Will overwrite if existing.
+|Option	|Description|
+|------	|-----------|
+|-map  	|name of the map in Zabbix. Will overwrite if existing.|
+|-ip		|IP address(es) of hosts to be included in the map.
+
+			Can take multiple address or ranges. Must be comma seperated.
+
+			Can have single addresses (E.g. 192.168.4.1)
+
+			or hyphenated ranges (E.g. 192.168.4.0-.128 or 192.168.4.0-5.0)|
+|-src		|Data source for the map {api,file}.|
+	
+
+ -map 		
+
  -ip			IP address(es) of hosts to be included in the map.
 			Can take multiple address or ranges. Must be comma seperated.
 			Can have single addresses (E.g. 192.168.4.1)
