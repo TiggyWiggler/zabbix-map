@@ -138,6 +138,10 @@ example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admi
 	</thead>
 	<tbody>
 		<tr>
+			<td>-ep</td>
+			<td>API End Point. Default http://localhost/api_jsonrpc.php</td>
+		</tr>
+		<tr>
 			<td>-map</td>
 			<td>name of the map in Zabbix. Will overwrite if existing.</td>
 		</tr>
