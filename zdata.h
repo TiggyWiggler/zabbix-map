@@ -109,6 +109,8 @@ struct host
     int devicesCount;
     double xPos; /**< x axis position when placing on the map canvas */
     double yPos; /**< y axis position when placing on the map canvas */
+    double w;   /**< width of the host when placing on the map canvas */
+    double h;   /**< width of the host when placing on the map canvas */
 };
 
 /**

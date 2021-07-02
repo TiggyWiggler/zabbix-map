@@ -58,6 +58,8 @@ node createNode(int id)
     ret.offsetSet = 0; // false
     ret.posX = 0.0;
     ret.posY = 0.0;
+    ret.w = 100.0; // assumed width of a node. TODO: make this 1.0 (unit space) and allow it to be set by parameter.
+    ret.h = 100.0; // assumed height of a node. TODO: make this 1.0 (unit space) and allow it to be set by parameter.
     ret.sortPos = -0;
     ret.numChildren = 0;
     ret.numDescendants = 0;
@@ -723,7 +725,7 @@ int comparRectHeight(const void *p1, const void *p2)
 int comparRectHeightDesc(const void *p1, const void *p2)
 {
     /* qsort comparitor by descending rectangle height */
-    return comparRectHeight(p1, p1) * -1; // invert the ascending result.
+    return comparRectHeight(p1, p2) * -1; // invert the ascending result.
 }
 
 void FFDH(rect *rects, int n, double width)
@@ -876,7 +878,7 @@ void arrangeTrees(forest *f)
     /* position all of the trees within the forest. */
     /* Trees must be dimensioned before calling this function */
     // Create a list of generalised rectangles representing the individual trees which can be passed to a rectangle packing algorithm.
-    int i;                  // loop itterator;
+    int i, j;               // loop itterator;
     long double area = 0.0; // Total area of all rectangles
     double maxWidth = 0.0;  // maxmium width of rectangles
     double width = 0.0;     // target width for the result rectangle.
@@ -890,6 +892,8 @@ void arrangeTrees(forest *f)
         (rects + i)->id = i; // Id of rectangle related to ordinal position of tree in the forest.
         (rects + i)->w = f->trees[i].width;
         (rects + i)->h = f->trees[i].height;
+        //debug
+        //printf("tree with width %f and height %f has area %f\n", f->trees[i].width, f->trees[i].height, f->trees[i].width * f->trees[i].height);
         area += (f->trees[i].width * f->trees[i].height); // calculate total area.
         if (f->trees[i].width > maxWidth)
             maxWidth = f->trees[i].width;
@@ -901,6 +905,7 @@ void arrangeTrees(forest *f)
 
     if (width == 0)
     {
+        fprintf(stderr, "Cannot arrange trees with total of zero width.");
         free(rects);
         exit(EXIT_FAILURE);
     }
@@ -911,8 +916,17 @@ void arrangeTrees(forest *f)
     // Copy the results back into the trees
     for (i = 0; i < f->treeCount; i++)
     {
-        f->trees[i].posX = (rects + i)->x;
-        f->trees[i].posY = (rects + i)->y;
+        for (j = 0; j < f->treeCount; j++)
+        {
+            // The order of the rects is altered in FFDH, however we still have the ordinal position of each tree
+            // set as the ID of the rect, so we just need to find the correct rect for each tree now.
+            if ((rects + j)->id == i)
+            {
+                // Correct rect found, write the data back to the tree.
+                f->trees[i].posX = (rects + j)->x;
+                f->trees[i].posY = (rects + j)->y;
+            }
+        }
     }
 
     free(rects);
@@ -1281,25 +1295,25 @@ void sizeTree(tree *t, double padding[4])
         for (i = 0; i < t->nodes->nodeCount; i++)
         {
             t->nodes->nodes[i].posY += padding[0]; // apply top pad.
-            t->nodes->nodes[i].posX += padding[3]; // apply top pad.
+            t->nodes->nodes[i].posX += padding[3]; // apply left pad.
             if (i == 0)
             {
                 // first node, use this to initialise values
                 minX = t->nodes->nodes[0].posX;
-                maxX = minX;
+                maxX = minX + t->nodes->nodes[0].w;
                 minY = t->nodes->nodes[0].posY;
-                maxY = minY;
+                maxY = minY + t->nodes->nodes[0].h;
             }
             else
             {
                 if (t->nodes->nodes[i].posX < minX)
                     minX = t->nodes->nodes[i].posX;
-                if (t->nodes->nodes[i].posX > maxX)
-                    maxX = t->nodes->nodes[i].posX;
+                if (t->nodes->nodes[i].posX + t->nodes->nodes[i].w > maxX)
+                    maxX = t->nodes->nodes[i].posX + t->nodes->nodes[i].w;
                 if (t->nodes->nodes[i].posY < minY)
                     minY = t->nodes->nodes[i].posY;
-                if (t->nodes->nodes[i].posY > maxY)
-                    maxY = t->nodes->nodes[i].posY;
+                if (t->nodes->nodes[i].posY + t->nodes->nodes[i].h > maxY)
+                    maxY = t->nodes->nodes[i].posY + t->nodes->nodes[i].h;
             }
         }
         t->height = maxY - minY;
@@ -1309,6 +1323,15 @@ void sizeTree(tree *t, double padding[4])
     }
 }
 
+/**
+ * position the nodes within the tree and calculate dimension limits.
+ * @param [in]  t       The tree
+ * @param [in] methods  the sort methods for the tree
+ * @param [in] methodCount  the number of sort methods passed in
+ * @param [in] nodeX        space between nodes on the x axis.
+ * @param [in] nodeY        space between nodes on the y axis.
+ * @param [in] padding      four element array declaring internal padding of the tree. array elements give padding north, east, south, west.
+ * */
 void layoutTree(tree *t, enum sortMethods methods[], int methodCount, double nodeX, double nodeY, double padding[4])
 {
     // Wrapper to execute all layout functions for a given tree.
@@ -1324,9 +1347,16 @@ void layoutTree(tree *t, enum sortMethods methods[], int methodCount, double nod
         offsetToRelative(t);
         for (i = 0; i < t->nodes->nodeCount; i++)
         {
-            // Apply the desired positioning to each node in the tree
-            t->nodes->nodes[i].posX *= nodeX;
-            t->nodes->nodes[i].posY *= nodeY;
+            /* Apply the desired positioning to each node in the tree. Nodes have unit size (1.0) at this point.
+                The strategy i am using here works, but is actually wrong. Each node should be positioned relative
+                to the left of it and above it. So each node should not take its own height and width, but the
+                height of the node above it and the width of the node to the left of it.
+                That is a problem for another day and as all nodes are currently the same width and height I 
+                don't need to worry about it. 
+                TODO: Try to implement the proper approach as explained above.
+            */
+            t->nodes->nodes[i].posX *= (nodeX + t->nodes->nodes[i].w);
+            t->nodes->nodes[i].posY *= (nodeY + t->nodes->nodes[i].h);
         }
         sizeTree(t, padding);
     }

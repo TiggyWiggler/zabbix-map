@@ -175,8 +175,7 @@ example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admi
 		</tr>
 		<tr>	
 			<td>-padding</td>
-			<td>padding of each tree. Applied to sides counter clockwise from north position. Four values required if given.<br/> 
-example: <code>-padding "100.0 50.0 100.0 50.0"</code></td>
+			<td>padding of each tree. Applied to sides counter clockwise from north position. Four values required if given. Comma separated.<br/> example: <code>-padding "100.0, 50.0, 100.0, 50.0"</code></td>
 		</tr>
 		<tr>	
 			<td>-nodespace</td>

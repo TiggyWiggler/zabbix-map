@@ -156,10 +156,20 @@ int main(int argc, char *argv[])
 
         if (hl.hosts.count > 0)
         {
+            for (i = 0; i < hl.hosts.count; i++)
+            {
+                // for now all hosts has a fixed width and height. I can implement variable size (e.g. to account for different icons) at a later time
+                hl.hosts.hosts[i].w = 100.0;
+                hl.hosts.hosts[i].h = 100.0;
+            }
+
             struct hostLink *hlPtr = &hl;
 
             if (hlPtr->hosts.count > 0)
+            {
+                // Map the hosts, including the pseudo hosts and hubs.
                 hlPtr = mapHosts(hlPtr);
+            }
 
             layoutHosts(hlPtr, nodeXSpace, nodeYSpace, pads, mc.sm, mc.n);
             // find the overall size of the map. It will be origined at 0,0 so we just need to max x and y coords.
@@ -167,10 +177,10 @@ int main(int argc, char *argv[])
             double xMax = 0.0, yMax = 0.0;
             for (i = 0; i < hlPtr->hosts.count; i++)
             {
-                if (hlPtr->hosts.hosts[i].xPos > xMax)
-                    xMax = hlPtr->hosts.hosts[i].xPos;
-                if (hlPtr->hosts.hosts[i].yPos > yMax)
-                    yMax = hlPtr->hosts.hosts[i].yPos;
+                if (hlPtr->hosts.hosts[i].xPos + hlPtr->hosts.hosts[i].w > xMax)
+                    xMax = hlPtr->hosts.hosts[i].xPos + hlPtr->hosts.hosts[i].w;
+                if (hlPtr->hosts.hosts[i].yPos + hlPtr->hosts.hosts[i].h > yMax)
+                    yMax = hlPtr->hosts.hosts[i].yPos + hlPtr->hosts.hosts[i].h;
             }
 
             // Add padding on to the overall size.
@@ -334,7 +344,7 @@ void showHelp()
     printf("\t\t\tChain multiple orders with spaces. \n");
     printf("\t\t\texample: -orderby \"descendants childrenDesc\"\n");
     printf(" -padding\t\tpadding of each tree. Applied to sides counter clockwise from north position.\n");
-    printf("\t\t\tFour values required if given. example: -padding \"100.0 50.0 100.0 50.0\"\n");
+    printf("\t\t\tFour values required if given. comma separated example: -padding \"100.0, 50.0, 100.0, 50.0\"\n");
     printf(" -nodespace\t\tSpacing between nodes within the map. Assumes nodes have zero size themselves.\n");
     printf("\t\t\tTwo values required if given. X axis first, Y axis second.\n");
     printf("\t\t\texample: -nodespace \"100.0, 50.0\"\n");

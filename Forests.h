@@ -37,6 +37,8 @@ struct node
     int id;                /* Identifier of the node. Must be unique within a given collection */
     double posX;           /* Either relative or absolute position on the canvas. */
     double posY;           /* Either relative or absolute position on the canvas. */
+    double w;               /* width of the node. Used for layout on the canvas */
+    double h;               /* height of the node. Used for layout on the canvas */
     int level;             /* Depth from root node */
     int sortPos;           /* Sort position relative to siblings */
     double offsetToParent; /* y axis position relative to parent node used during layout calculations */
