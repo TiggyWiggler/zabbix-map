@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include "zmap.h"
 
-
 char *stripSeparators(char *input)
 {
     // Remove seperators from a string.
@@ -186,13 +185,13 @@ struct hostCol *addPseudoHosts(struct hostCol *hosts, struct linkCol *links)
         if (links->links[i].a.hostId == 0 || links->links[i].b.hostId == 0)
         {
             // One side of the link does not have an assigned host, so a pseudo host is required.
-            for (j = 0; j < links->count; j++)
+            for (j = 0; j < hosts->count; j++)
             {
                 // attempt to find an existing match.
                 // only hosts that are pseudo hosts will not have a zabbixID set
-                if (i != j && hosts->hosts[j].zabbixId == 0)
+                if (hosts->hosts[j].zabbixId == 0)
                 {
-                    if (hosts->hosts[j].chassisId == (links->links[i].a.hostId == 0 ? links->links[i].a.chassisId : links->links[i].b.chassisId))
+                    if (strcmp(hosts->hosts[j].chassisId, (links->links[i].a.hostId == 0 ? links->links[i].a.chassisId : links->links[i].b.chassisId)) == 0)
                     {
                         // We have found an existing match
                         if (links->links[i].a.hostId == 0)
@@ -237,7 +236,7 @@ struct hostCol *addPseudoHosts(struct hostCol *hosts, struct linkCol *links)
 
                 // Name
                 strcpy(h->name, h->chassisId);
-                
+
                 hosts->count++;
             }
         }
@@ -470,9 +469,6 @@ struct hostLink *mapHosts(struct hostLink *hl)
  * */
 struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
 {
-
-    // TODO: Test and Valgrind this as I have not even tested that it runs yet.
-
     if (hl->hosts.count == 0)
         return f;
 
@@ -652,7 +648,7 @@ struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
             free(hostsToBeAdded);
         }
     }
-    
+
     return f;
 }
 
@@ -666,16 +662,15 @@ struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
  * @param [in]  sortCount       number of sorting methods that have been supplied. */
 void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount)
 {
-    int i, j, k;         // loop itterator
+    int i, j, k;      // loop itterator
     int rootOrd;      // Ordinal position of the root node.
     int linkCount;    // number of links for the root node.
-    int linkCountTmp;   // number of links for a given node scratch memory.
+    int linkCountTmp; // number of links for a given node scratch memory.
     struct forest *f = malloc(sizeof *f);
     struct host *h;
     struct node *n;
     struct tree *t;
     f->treeCount = 0;
-
 
     // Convert the hosts and links taken from Zabbix into a generalised forest (collection of tree structures)
     f = hostLinkToForest(f, hostsLinks);
@@ -694,18 +689,18 @@ void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpa
             {
                 // Multiple nodes (or zero, but that should not happen);
                 rootOrd = -1;
-                linkCount=0;
-                for (j=0;j<f->trees[i].nodes->nodeCount;j++)
+                linkCount = 0;
+                for (j = 0; j < f->trees[i].nodes->nodeCount; j++)
                 {
                     // which node has the highest number of other nodes connected to it? We will take the first highest result as the root.
                     linkCountTmp = getConnectedNodeCount(f->trees[i].nodes->nodes[j].id, &f->trees[i]);
-                    if(linkCountTmp > linkCount)
+                    if (linkCountTmp > linkCount)
                     {
                         linkCount = linkCountTmp;
                         rootOrd = j;
                     }
                 }
-                f->trees[i].nodes->nodes[rootOrd].level = 0;        // Set the node with the highest number of connected nodes as the root.
+                f->trees[i].nodes->nodes[rootOrd].level = 0; // Set the node with the highest number of connected nodes as the root.
             }
         }
 
@@ -714,24 +709,26 @@ void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpa
         layoutForest(f, sorts, sortCount, hostXSpace, hostYSpace, padding);
 
         // update the hostslinks with the positioning data in the forest.
-        for (i=0; i<hostsLinks->hosts.count;i++)
+        for (i = 0; i < hostsLinks->hosts.count; i++)
         {
-            for(j=0;j<f->treeCount;j++)
+            for (j = 0; j < f->treeCount; j++)
             {
-                for(k=0; k<f->trees[j].nodes->nodeCount;k++)
+                for (k = 0; k < f->trees[j].nodes->nodeCount; k++)
                 {
-                    // for each host in hostsLinks, find the corresponding node in the corresponding tree and then 
+                    // for each host in hostsLinks, find the corresponding node in the corresponding tree and then
                     // position the host by applying the x and y position of the tree plus the node which gives the
                     // absolute position of the tree node (and hence the host) on the canvas.
-                    if(hostsLinks->hosts.hosts[i].id == f->trees[j].nodes->nodes[k].id)
+                    if (hostsLinks->hosts.hosts[i].id == f->trees[j].nodes->nodes[k].id)
                     {
                         // Found the tree and treenode that corresponds to the host.
                         // set the hosts position.
                         h = &hostsLinks->hosts.hosts[i];
                         t = &f->trees[j];
                         n = &t->nodes->nodes[k];
-                        h->xPos = t->posX + n->posX;        // TODO: posX and xPos: be consistent.
+                        h->xPos = t->posX + n->posX; // TODO: posX and xPos: be consistent.
                         h->yPos = t->posY + n->posY;
+                        h->w = n->w;
+                        h->h = n->h;
                     }
                 }
             }
