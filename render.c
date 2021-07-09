@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "zdata.h"
+#include "render.h"
 /**
  * Render a bitmap image to file.
  * @param [in]  name    The name of the output bitmap along with extension.
@@ -76,8 +77,8 @@ void renderBmp(char *name, size_t w, size_t h, short int red[w][h], short int gr
 void renderHL(struct hostLink *hl)
 {
     // Render a host link collection to bitmap file.
-    int i, j; // loop itterators
-    int w, h; // width and height
+    int i, j, k; // loop itterators
+    int w, h;    // width and height
     struct host *host;
     char *name = "hostlinks.bmp";
 
@@ -104,8 +105,18 @@ void renderHL(struct hostLink *hl)
             blue[i][j] = 255;
         }
 
-
+    // Output the individual hosts as simple objects
+    for (i = 0; i < hl->hosts.count; i++)
+    {
+        host = &hl->hosts.hosts[i];
+        for (j = host->xPos; j < host->xPos + host->w; j++)
+            for (k = host->yPos; k < host->yPos + host->h; k++)
+            {
+                red[i][j] = 0;
+                green[i][j] = 0;
+                blue[i][j] = 0;
+            }
+    }
 
     renderBmp(name, (size_t)w, (size_t)h, red, green, blue);
 }
-

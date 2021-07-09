@@ -25,6 +25,7 @@
 #include "zconn.h"
 #include "Forests.h"
 #include "ip.h"
+#include "render.h"
 
 struct methodCol
 {
@@ -50,7 +51,8 @@ int main(int argc, char *argv[])
     char user[120] = "Admin";
     char pw[120] = "zabbix";
     char debug[6] = "false";
-    char ep[256] = ""; // API End Point
+    char ep[256] = "";   // API End Point
+    char out[4] = "api"; // output. api=Zabbix API (map), bmp = bitmap image
     char *cptr = NULL;
     int h = 0; // show help.
     int i;
@@ -83,6 +85,8 @@ int main(int argc, char *argv[])
                 cptr = &debug[0];
             else if (strcmp(argv[i], "-ep") == 0)
                 cptr = &ep[0];
+            else if (strcmp(argv[i], "-out") == 0)
+                cptr = &out[0];
             else if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "--h") == 0) || (strcmp(argv[i], "--?") == 0) || (strcmp(argv[i], "--help") == 0))
                 // help required
                 h = 1;
@@ -105,6 +109,7 @@ int main(int argc, char *argv[])
         printf("Order By: %s\n", sortStr);
         printf("Padding: %s\n", padStr);
         printf("Node Spacing: %s\n", nodeSpace);
+        printf("Output: %s\n", out);
         printf("Username: %s\n", user);
         printf("Password: %s\n", pw);
     }
@@ -187,11 +192,18 @@ int main(int argc, char *argv[])
             xMax += pads.right;
             yMax += pads.bottom;
 
-            // Delete the map if it currently exists.
-            zconnDeleteMapByName(map);
+            if (strcmp(out, "api") == 0)
+            {
+                // Delete the map if it currently exists.
+                zconnDeleteMapByName(map);
 
-            // Write the map into Zabbix
-            createMap(hlPtr, map, xMax, yMax);
+                // Write the map into Zabbix
+                createMap(hlPtr, map, xMax, yMax);
+            }
+            else if (strcmp(out, "bmp") == 0)
+            {
+                renderHL(hlPtr);
+            }
 
             freeHostCol(&(hlPtr->hosts));
             if (hlPtr->links.count > 0)
