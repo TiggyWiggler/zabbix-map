@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(out, "bmp") == 0)
             {
-                renderHL(hlPtr);
+                renderHL(hlPtr, &pads);
             }
 
             freeHostCol(&(hlPtr->hosts));

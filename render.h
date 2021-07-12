@@ -21,6 +21,8 @@
 #ifndef RENDER_HEADER
 #define RENDER_HEADER
 
-void renderHL(struct hostLink *hl);
+#include "zmap.h"
+
+void renderHL(struct hostLink *hl, struct padding *pads);
 
 #endif

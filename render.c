@@ -3,6 +3,10 @@
 #include <string.h>
 #include "zdata.h"
 #include "render.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 /**
  * Render a bitmap image to file.
  * @param [in]  name    The name of the output bitmap along with extension.
@@ -74,11 +78,11 @@ void renderBmp(char *name, size_t w, size_t h, short int red[w][h], short int gr
     fclose(f);
 }
 
-void renderHL(struct hostLink *hl)
+void renderHL(struct hostLink *hl, struct padding *pads)
 {
     // Render a host link collection to bitmap file.
-    int i, j, k; // loop itterators
-    int w, h;    // width and height
+    int i, j, k;      // loop itterators
+    int w = 0, h = 0; // width and height
     struct host *host;
     char *name = "hostlinks.bmp";
 
@@ -90,6 +94,9 @@ void renderHL(struct hostLink *hl)
         if (host->yPos + host->h > h)
             h = host->yPos + host->h;
     }
+
+    w += pads->right;
+    h += pads->bottom;
 
     // pixel arrays
     short int red[w][h];
@@ -105,18 +112,35 @@ void renderHL(struct hostLink *hl)
             blue[i][j] = 255;
         }
 
-    // Output the individual hosts as simple objects
+    // Write the host objects out (as black squares at time of writting)
     for (i = 0; i < hl->hosts.count; i++)
     {
         host = &hl->hosts.hosts[i];
         for (j = host->xPos; j < host->xPos + host->w; j++)
             for (k = host->yPos; k < host->yPos + host->h; k++)
             {
-                red[i][j] = 0;
-                green[i][j] = 0;
-                blue[i][j] = 0;
+                red[j][k] = 0;
+                green[j][k] = 0;
+                blue[j][k] = 0;
             }
     }
 
-    renderBmp(name, (size_t)w, (size_t)h, red, green, blue);
+    unsigned char *d = malloc((sizeof d * (h * w)));
+
+    // write to character array
+    int pos = 0;
+
+    for (j = 0; j < h; j++)
+        for (i = 0; i < w; i++)
+        {
+            d[pos++] = (unsigned char)red[i][j];
+            d[pos++] = (unsigned char)green[i][j];
+            d[pos++] = (unsigned char)blue[i][j];
+        }
+
+    int bpp = 3; // Bytes per pixel
+    stbi_write_bmp(name, w, h, bpp, d);
+
+    //renderBmp(name, (size_t)w, (size_t)h, red, green, blue);
+    free(d);
 }
