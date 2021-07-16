@@ -8,6 +8,8 @@
 #include "stb_image_write.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
 
 void renderHL(struct hostLink *hl, struct padding *pads)
 {
@@ -135,6 +137,77 @@ void renderHL(struct hostLink *hl, struct padding *pads)
             d[pos++] = (unsigned char)green[i][j];
             d[pos++] = (unsigned char)blue[i][j];
         }
+
+    // Write some text for each host.
+    // See example code for Hello World in stb_truetype.h
+    //int x0, y0, x1, y1;
+    float scale, xpos = 2; // leave a little padding in case the character extends left
+    int ascent, baseline, ch = 0, advance, lsb;
+    char *text = "1234";
+    char *buffer = malloc(7 << 14); // file's 108.2kB, this will clear it.
+    fread(buffer, 1, 1000000, fopen("fonts/LiberationMono-Regular.ttf", "rb"));
+
+    stbtt_fontinfo font;
+    stbtt_InitFont(&font, buffer, 0);
+
+    scale = stbtt_ScaleForPixelHeight(&font, 20);
+    stbtt_GetFontVMetrics(&font, &ascent, 0, 0);
+    baseline = (int)(ascent * scale);
+
+    int charStart, stride;
+
+    while (text[ch])
+    {
+        int bmpW, bmpH, bmpXOff, bmpYOff;
+        unsigned char *glyph = stbtt_GetCodepointBitmap(&font, scale, scale, text[ch], &bmpW, &bmpH, &bmpXOff, &bmpYOff);
+        int pos = 0;
+        for (i = 0; i < bmpH; i++)
+        {
+            pos = ((i * w) + xpos) * 3;
+            for (j = 0; j < bmpW; j++)
+            {
+                d[pos++] = ~glyph[(i * bmpW) + j];
+                d[pos++] = ~glyph[(i * bmpW) + j];
+                d[pos++] = ~glyph[(i * bmpW) + j];
+            }
+        }
+        stbtt_GetCodepointHMetrics(&font, text[ch], &advance, &lsb);
+        //xpos += bmpW;     // If using the advance variable you do not need to manually account for the glyph width.
+        xpos += (advance * scale);
+        if (text[ch + 1])
+            xpos += scale * stbtt_GetCodepointKernAdvance(&font, text[ch], text[ch + 1]);
+        ++ch;
+
+        /*float x_shift = xpos - (float)floor(xpos); // Not quite sure what this is doing. Looks like it is trying to kill rounding error.
+        
+        stbtt_GetCodepointBitmapBox(&font, text[ch], scale, scale, &x0, &y0, &x1, &y1);
+        int outw, outh;
+        outw = x1 - x0;
+        outh = y1 - y0;
+        char glyph[outh][outw];
+        stbtt_MakeCodepointBitmap(&font, &glyph[baseline + y0][0], outw, outh, 0, scale, scale, text[ch]);
+
+        // Write glyph to bitmap.
+        int bmppos;
+        for (j = 0; j < y1 - y0; j++)
+        {
+            bmppos = (xpos + (j * w)) * 3;
+            for (i = 0; i < x1 - x0; i++)
+            {
+                d[bmppos++] = glyph[j][i];
+                d[bmppos++] = glyph[j][i];
+                d[bmppos++] = glyph[j][i];
+            }
+        }
+
+        xpos += (advance * scale);
+        if (text[ch + 1])
+            xpos += scale * stbtt_GetCodepointKernAdvance(&font, text[ch], text[ch + 1]);
+
+        ++ch;*/
+    }
+
+    free(buffer);
 
     int bpp = 3; // Bytes per pixel
     stbi_write_bmp(name, w, h, bpp, d);
