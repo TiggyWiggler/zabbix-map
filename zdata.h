@@ -101,6 +101,7 @@ struct host
     char name[129];
     int id;                                  /**< Id of this data item (can exist only in this connector if creating a new host to be copied to Zabbix) */
     int zabbixId;                            /**< Id of the device in Zabbix (host Id). A host created in this C code but not existing in Zabbix (E.g. Pseudo Host) would have an ID but no Zabbix ID. */
+    char sysDesc[256];                      /**<System Description. Not needed by Zabbix Mapper core functionality, but the bitmap renderer (where used) can use this field to select better icons if provided.*/
     char interfaces[HOST_INTERFACE_MAX][17]; /**< Array of IP addresses for the host */
     int interfaceCount;
     char chassisId[256];                /**< Chassis ID for the device. E.g. MAC address for the switch or computer */

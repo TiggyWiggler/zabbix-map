@@ -347,6 +347,11 @@ void showHelp()
     printf(" -src\t\t\tData source for the map {api,file}.\n");
     printf("\t\t\tif taken from file then cache file is source.\n");
     printf("\t\t\tif api then data comes from live data and cache file is used to store results.\n");
+    printf(" -out\t\t\tWhere the resulting map should be outputted {api, bmp}.\n");
+    printf("\t\t\tif api then resultant map is sent to Zabbix\n");
+    printf("\t\t\tif bmp then resultant map is output as a bitmap file in the local folder\n");
+    printf("\t\t\tbitmap renderer is entirely internal to this code so do not expect it to be comparible\n");
+    printf("\t\t\tto the Zabbix rendered map.\n");
     printf(" -cache\t\t\tname of the cache file.\n");
     printf(" -orderby\t\tOne or more order by values. Used to order host nodes.\n");
     printf("\t\t\tdescendants: order by number of descendants at all levels below subject node.\n");

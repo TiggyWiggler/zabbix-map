@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <ctype.h>
 #include "zdata.h"
 #include "render.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -10,6 +10,34 @@
 #include "stb_image.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize.h"
+
+int strPos(char *tofind, char *findin, uint start)
+{
+    // Find a string in another string and return its position.
+    // return -1 if nothing found.
+    // This is just a copy and paste of instr used in zconn.c but I couldn't be bothered to generalise it into a string
+    // specific file so I just copy / pasted / and changed the name to create a namespace separation.
+    // TODO: Create a string file and put the function in there.
+    int i, j; // Loop itterators
+
+    if (start > strlen(findin) - 1)
+        return -1;
+
+    for (i = start, j = 0; findin[i] != '\0' && tofind[j] != '\0'; i++)
+    {
+        if (findin[i] == tofind[j])
+            j++;
+        else
+            j = 0;
+    }
+    if (j == 0)
+        return -1;
+    else if (tofind[j] == '\0')
+        return i - j;
+    return -1; // ToFind is beyond the limit of FindIn.
+}
 
 /**
  * Set a single pixel in a bitmap
@@ -177,35 +205,91 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
  * @param [in]  d       bitmap data. assumes three channel (RBG)
  * @param [in]  w       bitmap width
  * @param [in]  h       bitmap height
- * @param [in]  x       x position of the text reference box. Top left corner typically, but I may make a 'centre align' option at a later date.
- * @param [in]  y       y position of the text reference box. Top left corner typically, but I may make a 'centre align' option at a later date.
+ * @param [in]  x       x position of the host image reference box. Top left corner typically. 
+ * @param [in]  y       y position of the host image reference box. Top left corner typically.
  * @param [in]  maxw    max width of the drawn host
  * @param [in]  maxh    max height of the drawn host
+ * @param [in]  align   alignment of the image compared to the host image reference box. 0 = top left align, 1 = centre middle align.
  * */
-void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, unsigned int x, unsigned int y, int maxw, int maxh)
+void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x, int y, int maxw, int maxh, unsigned short int align)
 {
-    int sprx, spry, sprn; // Sprite x (width), y (height), n ('comp' which is 3 for RGB, 4 for RGBA (Specific to stb library)).
-    unsigned char *data = stbi_load("images/XC206-2SFP_96.jpg", &sprx, &spry, &sprn, 0);
     int bpp = 3;                    // bytes per pixes
-    int stride = (w - sprx) * bpp;  // the stride in data required to go from the end of data on one row to the start of the data on another row.
+    int sprx, spry, sprn;           // Sprite x (width), y (height), n ('comp' which is 3 for RGB, 4 for RGBA (Specific to stb library)).
+    int imgw, imgh;                 // final image width and height after resize.
+    int stride;                     // the stride in data required to go from the end of data on one row to the start of the data on another row.
     int srcPos = 0, tarPos, rowPos; // data position indicators (relative pointers);
     int i, j;
+    float srcar, tarar;  // aspect ratio source and target
+    unsigned char *data; // Source image that will be used to represent the host.
+    if (align > 1)
+    {
+        fprintf(stderr, "drawHost alignment invalid\n");
+        return;
+    }
+
+    // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
+    // 'generalise' this if I even put this into production, along with caching images between calls etc.
+
+    char *sysDesc;
+    strcpy(sysDesc, host->sysDesc); // Copy System Description
+    for (; *sysDesc; ++sysDesc)
+        *sysDesc = tolower(*sysDesc); // Convert System Description to lower
+    if (strPos("xc206", sysDesc, 0) > -1)
+        data = stbi_load("images/XC206-2SFP_96.jpg", &sprx, &spry, &sprn, 0);
+    if (strPos("xr524", sysDesc, 0) > -1)
+        data = stbi_load("images/XR524-8C.jpg", &sprx, &spry, &sprn, 0);
+    else
+        data = stbi_load("images/generic switch.jpg", &sprx, &spry, &sprn, 0);
+
+    // Set resize target based on target bounding box.
+    srcar = (float)sprx / spry;
+    tarar = (float)maxw / maxh;
+    if (srcar > tarar)
+    {
+        // limiting factor is the width of the bounding box
+        imgw = maxw;
+        imgh = floor(imgw / srcar);
+    }
+    else
+    {
+        // limiting factory is the height of the bounding box
+        imgh = maxh;
+        imgw = floor(imgh * srcar);
+    }
+
+    // reposition the x and y co ordinates to where the top left of the image needs to be drawn.
+    // only need to do this if the target alignment is not top left align already.
+    if (align == 1)
+    {
+        x = x - floor(imgw / 2.0);
+        y = y - floor(imgh / 2.0);
+    }
+
+    x = (x < 0) ? 0 : x; // Prevent x < 0;
+    y = (y < 0) ? 0 : y; // Prevent y < 0;
+
+    // resize image.
+    unsigned char *resized = malloc(imgw * imgh * bpp);
+    stbir_resize_uint8(data, sprx, spry, 0, resized, imgw, imgh, 0, bpp); // resize the host image.
+
+    stride = (w - imgw) * bpp;
 
     tarPos = y * w * bpp;
     tarPos += x * bpp;
 
-    while (srcPos < sprx * spry * bpp)
+    while (srcPos < imgw * imgh * bpp)
     {
         rowPos = 0;
-        while (rowPos < (sprx * bpp))
+        while (rowPos < (imgw * bpp))
         {
-            d[tarPos++] = data[srcPos++];
+            d[tarPos++] = resized[srcPos++];
             rowPos++;
         }
 
         tarPos += stride;
     }
     stbi_image_free(data);
+    free(resized);
 }
 
 void renderHL(struct hostLink *hl, struct padding *pads)
@@ -228,42 +312,25 @@ void renderHL(struct hostLink *hl, struct padding *pads)
     w += pads->right;
     h += pads->bottom;
 
-    // pixel arrays
-    short int red[w][h];
-    short int green[w][h];
-    short int blue[w][h];
+    unsigned char *d = malloc((sizeof d * (h * w) * 3));
 
-    // set the background
-    for (i = 0; i < w; i++)
-        for (j = 0; j < h; j++)
-        {
-            red[i][j] = 255;
-            green[i][j] = 255;
-            blue[i][j] = 255;
-        }
-
-    
-
-    unsigned char *d = malloc((sizeof d * (h * w)));
-
-    // write to character array
-    int pos = 0;
-
-    for (j = 0; j < h; j++)
-        for (i = 0; i < w; i++)
-        {
-            d[pos++] = (unsigned char)red[i][j];
-            d[pos++] = (unsigned char)green[i][j];
-            d[pos++] = (unsigned char)blue[i][j];
-        }
+    // Set the background of the image. Bytes per pixel = 3.
+    for (i = 0; i < h * w * 3; i++)
+        d[i] = 255;
 
     // Output the host data.
     for (i = 0; i < hl->hosts.count; i++)
     {
+        int maxImgH = 80; // dimensions of host image.
+        int maxImgW = 100;
+        int imgX = host->xPos + floor(maxImgW / 2.0); // reference position for the host image
+        int imgY = host->yPos + floor(maxImgH / 2.0);
+
         host = &hl->hosts.hosts[i];
 
         // Draw the host itself
-        drawHost(host, d, w, h, host->xPos, host->yPos, host->w, host->h);
+        drawHost(host, d, w, h, imgX, imgY, maxImgW, maxImgH, 1); // centre middle align
+        //drawHost(host, d, w, h, host->xPos, host->yPos, 100, 100, 0);   // top left align setup
 
         // Write the text for the hosts.
         writeText(host->name, d, w, h, 15, host->xPos, host->yPos + host->h - 15, host->w);
@@ -299,35 +366,11 @@ void renderHL(struct hostLink *hl, struct padding *pads)
         }
         if (n0 > 0 && n1 > 0)
         {
+            // Cheat: to draw the lines in the middle of the images, move the y positions up 10 pixels for both targets.
+            // this is because the host 'box' has 80px given over to the image and 20px given over to the text.
+            y0 -= 10; // uncomment for centre middle align
+            y1 -= 10; // uncomment for centre middle align
             drawLine(d, w, h, x0, y0, x1, y1, 0, 0, 0);
-            /*
-                // Both ends of the line have been resolved. Draw them on the bitmap
-                // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
-                int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-                int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-                int err = (dx > dy ? dx : -dy) / 2, e2;
-
-                for (;;)
-                {
-                    //setPixel(x0, y0);
-                    red[x0][y0] = 0;
-                    green[x0][y0] = 0;
-                    blue[x0][y0] = 0;
-
-                    if (x0 == x1 && y0 == y1)
-                        break;
-                    e2 = err;
-                    if (e2 > -dx)
-                    {
-                        err -= dy;
-                        x0 += sx;
-                    }
-                    if (e2 < dy)
-                    {
-                        err += dx;
-                        y0 += sy;
-                    }
-                }*/
         }
     }
 
