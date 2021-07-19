@@ -8,9 +8,7 @@ latex/
 html/
 
 # cache files #
-hosts.jarray
-maps.jarray
-images.jarray
+*.jarray
 
 # IDE specific#
 .vscode/

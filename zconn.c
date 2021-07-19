@@ -583,7 +583,7 @@ struct hostCol zconnParseHosts(json_object *jhosts)
                                     if (json_object_object_get_ex(jitem, "lastvalue", &jobjTmp))
                                         strcpy(hosts.hosts[i].chassisId, json_object_get_string(jobjTmp));
                                 }
-                                else if (instr("System Description", itemName, 0) > -1) // Not used by Zabbix Mapper directly but useful to the bitmap renderer if used.
+                                else if (instr("System description", itemName, 0) > -1) // Not used by Zabbix Mapper directly but useful to the bitmap renderer if used.
                                 {
                                     if (json_object_object_get_ex(jitem, "lastvalue", &jobjTmp))
                                         strcpy(hosts.hosts[i].sysDesc, json_object_get_string(jobjTmp));

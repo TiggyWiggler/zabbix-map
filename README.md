@@ -162,9 +162,9 @@ example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admi
 		<tr>
 			<td>-out</td>
 			<td>Where the resulting map should be outputted {api, bmp}.<br/>
-			if api then resultant map is sent to Zabbix.<br/>
-			if bmp then resultant map is output as a bitmap file in the local folder.<br/>
-			bitmap renderer is entirely internal to this code so do not expect it to be comparible<br/>
+			If api then resultant map is sent to Zabbix.<br/>
+			If bmp then resultant map is output as a bitmap file in the local folder.<br/>
+			Bitmap renderer is entirely internal to this code so do not expect it to be comparible<br/>
 			to the Zabbix rendered map.</td>
 		</tr>
 		<tr>	
