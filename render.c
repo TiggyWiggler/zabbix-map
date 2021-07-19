@@ -189,7 +189,11 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
             }
         }
         if (last == 1)
+        {
+            free(glyph);
             break;
+        }
+
         xpos += (advance * scale);
         if (text[ch + 1])
             xpos += scale * stbtt_GetCodepointKernAdvance(&font, text[ch], text[ch + 1]);
@@ -221,6 +225,7 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
     int i, j;
     float srcar, tarar;  // aspect ratio source and target
     unsigned char *data; // Source image that will be used to represent the host.
+    char *sysDesc;
     if (align > 1)
     {
         fprintf(stderr, "drawHost alignment invalid\n");
@@ -230,10 +235,13 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.
 
-    char *sysDesc = malloc(strlen(host->sysDesc) +1);
-    strcpy(sysDesc, host->sysDesc); // Copy System Description
-    for (i=0; sysDesc[i];i++)
-    sysDesc[i] = tolower(sysDesc[i]);// Convert System Description to lower
+    sysDesc = malloc(strlen(host->sysDesc) + 1);
+    memset(sysDesc, '\0', 1);
+    if (strlen(host->sysDesc) > 0)
+        strcpy(sysDesc, host->sysDesc); // Copy System Description
+
+    for (i = 0; sysDesc[i]; i++)
+        sysDesc[i] = tolower(sysDesc[i]); // Convert System Description to lower
 
     if (strPos("xc206", sysDesc, 0) > -1)
         data = stbi_load("images/XC206-2SFP_96.jpg", &sprx, &spry, &sprn, 0);
@@ -243,6 +251,8 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         data = stbi_load("images/XC208.jpg", &sprx, &spry, &sprn, 0);
     else
         data = stbi_load("images/generic_switch.jpg", &sprx, &spry, &sprn, 0);
+
+    free(sysDesc);
 
     // Set resize target based on target bounding box.
     srcar = (float)sprx / spry;

@@ -382,6 +382,7 @@ struct host zconnNewHost()
     ret.linkedDevices = NULL;
     memset(ret.chassisId, '\0', 256);
     ret.chassisIdType = 0;
+    strcpy(ret.sysDesc,"");
     return ret;
 }
 

@@ -165,6 +165,7 @@ int zconnFreeId(struct hostCol *hosts)
             }
         }
     } while (found == 1);
+
     return j;
 }
 
@@ -313,14 +314,13 @@ void addPseudoHubs(struct hostLink *hostsLinks)
                 // i is traversing the b side of the links
                 jLe = &(hostsLinks->links.links[j - hostsLinks->links.count].b);
             }
-
             if (iLe->hostId == jLe->hostId && strcmp(iLe->portRef, jLe->portRef) == 0 && strcmp(iLe->portRef, "") != 0)
             {
                 // Two devices are connected to the same host on the same port. We need to insert a hub here.
                 if (pseudoHub == NULL)
                 {
                     //we need to add a new pseudo hub
-                    if (hostsLinks->hosts.count = hostsSize)
+                    if (hostsLinks->hosts.count == hostsSize)
                     {
                         // We need to resize the hosts collection to accept more host objects.
                         hostsSize += 5;
@@ -376,7 +376,7 @@ void addPseudoHubs(struct hostLink *hostsLinks)
             pseudoPort++;
 
             // Now create a new link which creates a connection between our new pseudo host and the common hosts that iLe and jLe were pointing to (common device would be SW4.P5 from our example).
-            if (hostsLinks->links.count = linksSize)
+            if (hostsLinks->links.count == linksSize)
             {
                 // We need to resize the links collection to accept more host objects.
                 linksSize += 5;
