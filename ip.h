@@ -56,5 +56,6 @@ struct ipRanges
  * @param [in] input    the list of IP address(es)
  * */
 struct ipRanges *parseIpRanges(char *input);
+unsigned int ip2ui(char *ip);
 
 #endif

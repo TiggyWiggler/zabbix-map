@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     char out[4] = "api"; // output. api=Zabbix API (map), bmp = bitmap image
     char *cptr = NULL;
     int h = 0; // show help.
-    int i;
+    int i, j, k;
 
     // Extract the input arguments.
     for (i = 1; i < argc; i++)
@@ -157,6 +157,51 @@ int main(int argc, char *argv[])
             }
             // else
             hl.hosts = zconnGetHostsFromFile(cache);
+        }
+
+        // check to see if the IP addresses on the host interfaces are within the limits of the ip ranges requested by the filter.
+        if (strlen(ip) > 0)
+        {
+            int ipasui;
+            if (hl.hosts.count > 0)
+            {
+                struct ipRanges *ips = parseIpRanges(ip);
+                int inRange;
+                if (ips->n > 0)
+                {
+                    for (i = hl.hosts.count - 1; i > -1; i--)
+                    {
+                        inRange = 0;
+                        for (k = 0; k < hl.hosts.hosts[i].interfaceCount; k++)
+                        {
+                            ipasui = ip2ui(hl.hosts.hosts[i].interfaces[k]);
+
+                            for (j = 0; j < ips->n; j++)
+                            {
+                                if (ips->ranges[j].lower <= ipasui && ips->ranges[j].upper >= ipasui)
+                                {
+                                    inRange = 1;
+                                    break;
+                                }
+                            }
+                            if (inRange == 1)
+                                break;
+                        }
+                        if (inRange == 0)
+                        {
+                            // Remove the host from the collection
+                            free(hl.hosts.hosts[i].linkedDevices);
+
+                            for (k = i; k < hl.hosts.count - 1; k++)
+                            {
+                                hl.hosts.hosts[k] = hl.hosts.hosts[k + 1];
+                            }
+
+                            hl.hosts.count--;
+                        }
+                    }
+                }
+            }
         }
 
         if (hl.hosts.count > 0)
