@@ -455,11 +455,13 @@ void printLinks(struct linkCol *links)
     }
 }
 
-struct hostLink *mapHosts(struct hostLink *hl)
+struct hostLink *mapHosts(struct hostLink *hl, int phubs, int phosts)
 {
     hl->links = findAllLinks(&(hl->hosts));
-    hl->hosts = *addPseudoHosts(&(hl->hosts), &(hl->links));
-    addPseudoHubs(hl);
+    if (phosts == 1)
+        hl->hosts = *addPseudoHosts(&(hl->hosts), &(hl->links));
+    if (phubs == 1)
+        addPseudoHubs(hl);
     return hl;
 }
 
@@ -734,8 +736,8 @@ void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpa
             }
         }
         // DEBUG print trees.
-        //for (i = 0; i < f->treeCount; i++)
-        //    printTree(&f->trees[i]);
+        for (i = 0; i < f->treeCount; i++)
+            printTree(&f->trees[i]);
     }
     freeForest(f);
 }

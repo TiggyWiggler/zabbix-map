@@ -43,6 +43,7 @@ struct node
     int sortPos;           /* Sort position relative to siblings */
     double offsetToParent; /* y axis position relative to parent node used during layout calculations */
     _Bool offsetSet;       /* offsetToParent has been populated. offsetToParent can be anything so no way to know by looking at it. */
+    _Bool relativeSet;      /* relative positioning (xPos and yPos) have been populated. Important when a child has multiple parents (loop). */ 
     int numDescendants;    /* statistic: number of descendants below this node at all levels (children, grandchildren, etc.) */
     int numChildren;       /* statistic: number of children attached to this node. These are linked nodes at +1 level compared to this node */
     int numGenerations;    /* statistic: number of generations beneath this node. 1 if there are just children, 2 if there are grandchildren, 3... etc. */

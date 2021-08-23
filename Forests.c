@@ -56,6 +56,7 @@ node createNode(int id)
     ret.level = -1; /* default value if not defined */
     ret.offsetToParent = 0.0;
     ret.offsetSet = 0; // false
+    ret.relativeSet = 0; // false
     ret.posX = 0.0;
     ret.posY = 0.0;
     ret.w = 100.0; // assumed width of a node. TODO: make this 1.0 (unit space) and allow it to be set by parameter.
@@ -1103,6 +1104,22 @@ void calcOffsets(int id, tree *t, double offsetMin)
         return; // already initialised.
 
     nodePtrCollection *children = getChildren(id, t); // my children
+
+    for (i = 0; i < children->nodeCount; i++)
+    {
+        if (children->nodes[i]->offsetSet == 1)
+        {
+            /*  This child has already had its offset set. 
+                This means that this child is probably the child of a different node 
+                which can happen if there is a loop (see test case 7).
+                Within this function we should ignore children that have already been positioned
+                as children of other nodes */
+            if (i < children->nodeCount - 1)
+                children->nodes[i] = children->nodes[i + 1];        // Conditionally shuffle the results back
+            children->nodeCount--;      // unconditionally reduce the count of children.
+        }
+    }
+
     if (!children || children->nodeCount == 0)
     {
         free(children);
@@ -1194,7 +1211,7 @@ void calcOffsets(int id, tree *t, double offsetMin)
                 free(offsets);
                 exit(EXIT_FAILURE);
             }
-            /*Itterate through the right contour of the left tree (MyChildren(i)) and the left contour of the right tree (MyChildren(i+1)).
+            /*Itterate through (walk) the right contour of the left tree (MyChildren(i)) and the left contour of the right tree (MyChildren(i+1)).
             Calculation below reads as CurrOffset = RightTree.LeftContour - LeftTree.RightContour*/
             offset = getCumulativeOffset(children->nodes[i + 1]->id, t, d, left, offsetMin) - getCumulativeOffset(clumpChildId, t, d, right, offsetMin);
 
@@ -1244,7 +1261,25 @@ void setRelativePositions(int id, tree *t, double parentRelativeX)
     {
         node->posX = parentRelativeX + node->offsetToParent;
         node->posY = node->level;
+        node->relativeSet=1;
         children = getChildren(id, t);
+
+        if (children)
+            for (i = 0; i < children->nodeCount; i++)
+            {
+                if (children->nodes[i]->relativeSet == 1)
+                {
+                /*  This child has already had its relative position set. 
+                This means that this child is probably the child of a different node 
+                which can happen if there is a loop (see test case 7).
+                Within this function we should ignore children that have already been positioned
+                as children of other nodes */
+                    if (i < children->nodeCount - 1)
+                        children->nodes[i] = children->nodes[i + 1]; // Conditionally shuffle the results back
+                    children->nodeCount--;                           // unconditionally reduce the count of children.
+                }
+            }
+
         if (children && children->nodeCount > 0)
         {
             for (i = 0; i < children->nodeCount; i++)

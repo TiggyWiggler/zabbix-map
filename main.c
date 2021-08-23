@@ -36,7 +36,7 @@ struct methodCol
 
 void showHelp(void);
 struct padding parsePadding(char *s);
-void parseSorts(char *s, struct methodCol mc);
+void parseSorts(char *s, struct methodCol *mc);
 void parseSpacing(char *s, double spaces[2]);
 
 int main(int argc, char *argv[])
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
     char debug[6] = "false";
     char ep[256] = "";   // API End Point
     char out[4] = "api"; // output. api=Zabbix API (map), bmp = bitmap image
+    char phubs[2] = "1";          // pseudo hubs 1=true, 0=false.
+    char phosts[2] = "1";         // pseudo hosts 1=true, 0=false
     char *cptr = NULL;
     int h = 0; // show help.
     int i, j, k;
@@ -85,6 +87,10 @@ int main(int argc, char *argv[])
                 cptr = &debug[0];
             else if (strcmp(argv[i], "-ep") == 0)
                 cptr = &ep[0];
+                else if (strcmp(argv[i], "-phubs") == 0)
+                cptr = &phubs[0];
+                else if (strcmp(argv[i], "-phosts") == 0)
+                cptr = &phosts[0];
             else if (strcmp(argv[i], "-out") == 0)
                 cptr = &out[0];
             else if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "--h") == 0) || (strcmp(argv[i], "--?") == 0) || (strcmp(argv[i], "--help") == 0))
@@ -137,7 +143,7 @@ int main(int argc, char *argv[])
         mc.n = 0;
         mc.s = 5;
         mc.sm = malloc(mc.s * sizeof mc.sm); // allocate space to the size parameter.
-        parseSorts(sortStr, mc);
+        parseSorts(sortStr, &mc);
 
         struct hostLink hl;
         hl.links.count = 0;
@@ -218,7 +224,7 @@ int main(int argc, char *argv[])
             if (hlPtr->hosts.count > 0)
             {
                 // Map the hosts, including the pseudo hosts and hubs.
-                hlPtr = mapHosts(hlPtr);
+                hlPtr = mapHosts(hlPtr, strncmp(phubs,"1",1)==0, strncmp(phosts,"1",1)==0);
             }
 
             layoutHosts(hlPtr, nodeXSpace, nodeYSpace, pads, mc.sm, mc.n);
@@ -305,48 +311,48 @@ struct padding parsePadding(char *s)
  * Convert string containing sort information into an array of sort methods
  * @param [in] s        string containing sort methods information.
  * */
-void parseSorts(char *s, struct methodCol mc)
+void parseSorts(char *s, struct methodCol *mc)
 {
 
     char delim[2] = ",";
     char *tok = strtok(s, delim);
     while (tok != NULL)
     {
-        if (mc.s == mc.n)
+        if (mc->s == mc->n)
         {
             // need more memory to be assigned.
-            mc.s += 5;
-            enum sortMethods *tmpPtr = realloc(mc.sm, mc.s * sizeof mc.sm);
+            mc->s += 5;
+            enum sortMethods *tmpPtr = realloc(mc->sm, mc->s * sizeof mc->sm);
             if (tmpPtr)
             {
                 fprintf(stderr, "Out of memory attempting to add sort methods to memory");
             }
-            mc.sm = tmpPtr;
+            mc->sm = tmpPtr;
         }
 
         if (strcmp(tok, "descendants"))
         {
-            mc.sm[mc.n++] = descendants;
+            mc->sm[mc->n++] = descendants;
         }
         else if (strcmp(tok, "descendantsDesc"))
         {
-            mc.sm[mc.n++] = descendantsDesc;
+            mc->sm[mc->n++] = descendantsDesc;
         }
         else if (strcmp(tok, "children"))
         {
-            mc.sm[mc.n++] = children;
+            mc->sm[mc->n++] = children;
         }
         else if (strcmp(tok, "childrenDesc"))
         {
-            mc.sm[mc.n++] = childrenDesc;
+            mc->sm[mc->n++] = childrenDesc;
         }
         else if (strcmp(tok, "generations"))
         {
-            mc.sm[mc.n++] = generations;
+            mc->sm[mc->n++] = generations;
         }
         else if (strcmp(tok, "generationsDesc"))
         {
-            mc.sm[mc.n++] = generationsDesc;
+            mc->sm[mc->n++] = generationsDesc;
         }
 
         tok = strtok(NULL, delim);
