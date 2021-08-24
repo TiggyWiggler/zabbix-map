@@ -460,6 +460,25 @@ struct hostLink *mapHosts(struct hostLink *hl, int phubs, int phosts)
     hl->links = findAllLinks(&(hl->hosts));
     if (phosts == 1)
         hl->hosts = *addPseudoHosts(&(hl->hosts), &(hl->links));
+
+    // We should now remove all hosts that have not been created. This ensures that we do not create a crazy number
+    // of hubs when pseudo hosts are disabled.
+    int i = 0;
+    int j;
+    while (i < hl->links.count)
+    {
+        if (hl->links.links[i].a.hostId == 0 || hl->links.links[i].b.hostId == 0)
+        {
+            for (j=i;j<hl->links.count-1;j++)
+            {
+                hl->links.links[j] = hl->links.links[j + 1];
+            }
+            hl->links.count--;
+        }
+        else
+            i++;
+    }
+
     if (phubs == 1)
         addPseudoHubs(hl);
     return hl;
@@ -661,8 +680,9 @@ struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
  * @param [in]  hostYSpace      spacing between hosts on the y axis
  * @param [in]  treePadding     spacing within the individual trees
  * @param [in]  sorts           sorting methods to be used with the trees
- * @param [in]  sortCount       number of sorting methods that have been supplied. */
-void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount)
+ * @param [in]  sortCount       number of sorting methods that have been supplied. 
+ * @param [in]  debug           output debugging information*/
+void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount, _Bool debug)
 {
     int i, j, k;      // loop itterator
     int rootOrd;      // Ordinal position of the root node.
@@ -736,8 +756,9 @@ void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpa
             }
         }
         // DEBUG print trees.
-        for (i = 0; i < f->treeCount; i++)
-            printTree(&f->trees[i]);
+        if (debug)
+            for (i = 0; i < f->treeCount; i++)
+                printTree(&f->trees[i]);
     }
     freeForest(f);
 }

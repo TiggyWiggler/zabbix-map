@@ -44,5 +44,5 @@ struct padding
 void printHosts(struct hostCol *hosts);
 void printLinks(struct linkCol *links);
 struct hostLink *mapHosts(struct hostLink *hl, int phubs, int phosts);
-void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount);
+void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount, _Bool debug);
 #endif

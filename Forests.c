@@ -1105,20 +1105,24 @@ void calcOffsets(int id, tree *t, double offsetMin)
 
     nodePtrCollection *children = getChildren(id, t); // my children
 
-    for (i = 0; i < children->nodeCount; i++)
-    {
-        if (children->nodes[i]->offsetSet == 1)
+    if (children && children->nodeCount > 0)
+        for (i = 0; i < children->nodeCount; i++)
         {
-            /*  This child has already had its offset set. 
+            if (children->nodes[i]->offsetSet == 1)
+            {
+                /*  This child has already had its offset set. 
                 This means that this child is probably the child of a different node 
                 which can happen if there is a loop (see test case 7).
                 Within this function we should ignore children that have already been positioned
                 as children of other nodes */
-            if (i < children->nodeCount - 1)
-                children->nodes[i] = children->nodes[i + 1];        // Conditionally shuffle the results back
-            children->nodeCount--;      // unconditionally reduce the count of children.
+                for (x = i; x < children->nodeCount - 1; x++)
+                {
+                    children->nodes[x] = children->nodes[x + 1]; // Conditionally shuffle the results back
+                }
+
+                children->nodeCount--; // unconditionally reduce the count of children.
+            }
         }
-    }
 
     if (!children || children->nodeCount == 0)
     {
@@ -1130,10 +1134,13 @@ void calcOffsets(int id, tree *t, double offsetMin)
     {
         // Only one child so will not be offset in any way, but we need to show that it has been initialised.
         // Ensure that sub-children have their position set.
-        calcOffsets(children->nodes[0]->id, t, offsetMin);
-        children->nodes[0]->offsetToParent = 0;
-        children->nodes[0]->offsetSet = 1;
-
+        node *childNode = getNodeById(id, t);
+        if (childNode->offsetSet == 0)
+        {
+            calcOffsets(children->nodes[0]->id, t, offsetMin);
+            children->nodes[0]->offsetToParent = 0;
+            children->nodes[0]->offsetSet = 1;
+        }
         free(children);
         return;
     }
@@ -1277,6 +1284,7 @@ void setRelativePositions(int id, tree *t, double parentRelativeX)
                     if (i < children->nodeCount - 1)
                         children->nodes[i] = children->nodes[i + 1]; // Conditionally shuffle the results back
                     children->nodeCount--;                           // unconditionally reduce the count of children.
+                    i--;
                 }
             }
 

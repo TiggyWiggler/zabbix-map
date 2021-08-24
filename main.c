@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
                 hlPtr = mapHosts(hlPtr, strncmp(phubs,"1",1)==0, strncmp(phosts,"1",1)==0);
             }
 
-            layoutHosts(hlPtr, nodeXSpace, nodeYSpace, pads, mc.sm, mc.n);
+            layoutHosts(hlPtr, nodeXSpace, nodeYSpace, pads, mc.sm, mc.n, strcmp(debug,"true") == 0);
             // find the overall size of the map. It will be origined at 0,0 so we just need to max x and y coords.
             int i;
             double xMax = 0.0, yMax = 0.0;
