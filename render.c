@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <pcre.h>
+#include <dirent.h>
 #include "zdata.h"
 #include "render.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -12,6 +14,9 @@
 #include "stb_truetype.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
+#include "strcommon.h"
+#include "json_tokener.h"
+#include "json_object.h"
 
 int strPos(char *tofind, char *findin, uint start)
 {
@@ -204,6 +209,158 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
 }
 
 /**
+ * Return the file name of the image to be used for a given host.
+*/
+int hostImg(struct host *host, char *imgName)
+{
+    char *drev = malloc(255); // entry->d_name reversed.
+    struct dirent *entry;
+    DIR *dp;
+
+    dp = opendir("images");
+    if (dp == NULL)
+    {
+        perror("opendir: Path does not exist or could not be read.");
+        return 0;
+    }
+
+    int matchfound; // We have found the name of the image file
+
+    while ((entry = readdir(dp)))
+    {
+        if (strlen(entry->d_name) > 5)
+        {
+            // 1. Reverse the string
+            // 2. get the first 5 characters
+            // 3. check to see if they say ".json" backwards ("nosj.").
+            // 4. if they are, read the file contents and tokenise it with json-c
+            // 5. extract the pcre (regex) matcher for this file.
+            // 6. test the string using the PCRE library (already included) against the current host
+            // 7. if no match close and loop.
+            // 8. if match then get the value for the image file name
+            // 9. close file and return result.
+
+            // 1. Reverse the string
+            strcpy(entry->d_name, drev);
+            reverse(drev);
+
+            // 2. get the first 5 characters
+            // 3. check to see if they say ".json" backwards ("nosj.").
+            if (strncmp(drev, "nosj.", 5) == 0)
+            {
+                // 4. if they are, read the file contents and tokenise it with json-c
+                /* declare a file pointer */
+                FILE *infile;
+                char *buffer;
+                long numbytes;
+                struct hostCol ret; // Default NULL object
+                ret.count = 0;
+                ret.hosts = NULL;
+
+                /* open an existing file for reading */
+                infile = fopen(entry->d_name, "r");
+
+                /* quit if the file does not exist */
+                if (infile == NULL)
+                    return 0;
+
+                /* Get the number of bytes */
+                fseek(infile, 0L, SEEK_END);
+                numbytes = ftell(infile);
+
+                /* reset the file position indicator to the beginning of the file */
+                fseek(infile, 0L, SEEK_SET);
+
+                /* grab sufficient memory for the buffer to hold the text */
+                buffer = (char *)calloc(numbytes, sizeof(char));
+
+                /* memory error */
+                if (buffer == NULL)
+                    return 0;
+
+                /* copy all the text into the buffer */
+                fread(buffer, sizeof(char), numbytes, infile);
+                fclose(infile);
+
+                struct json_tokener *tok = json_tokener_new();
+                enum json_tokener_error jerr;
+                json_object *jobj;
+
+                do
+                {
+                    jobj = json_tokener_parse_ex(tok, buffer, numbytes);
+                } while ((jerr = json_tokener_get_error(tok)) == json_tokener_continue);
+                if (jerr != json_tokener_success)
+                {
+                    fprintf(stderr, "Error: %s\n", json_tokener_error_desc(jerr));
+                    return 0;
+                }
+
+                json_tokener_free(tok);
+
+                /* free the memory we used for the buffer */
+                free(buffer);
+
+                if (jobj)
+                {
+                    // 5. extract the pcre (regex) matcher for this file.
+                    json_object *jobjTmp;
+                    json_object *jcheck; // a check that needs to be completed.
+                    json_object *jcheckname;
+                    json_object *jcheckpcre;
+
+                    char *checkname[256];
+                    char *checkpcre[256];
+                    char *image;
+                    int checkCount; // How many PCRE checks are listed in the JSON file?
+                    int i;
+                    if (json_object_object_get_ex(jobj, "interfaces", &jobjTmp))
+                    {
+                        // IP addresses
+                        checkCount = json_object_array_length(jobjTmp);
+                        matchfound = 0;
+                        for (i = 0; i < checkCount; i++)
+                        {
+                            jcheck = json_object_array_get_idx(jobjTmp, i);
+                            if (json_object_object_get_ex(jcheck, "name", &jcheckname))
+                                if (json_object_object_get_ex(jcheck, "pcre", &jcheckpcre))
+                                {
+                                    strcpy(checkname, json_object_get_string(jcheckname));
+                                    strcpy(checkpcre, json_object_get_string(jcheckpcre));
+                                    // 6. test the string using the PCRE library (already included) against the current host
+                                    // http://www.pcre.org/current/doc/html/
+                                }
+                        }
+
+                        if (matchfound = 1)
+                        {
+                            // 8. if match then get the value for the image file name
+                            if (json_object_object_get_ex(jobj, "image", &jobjTmp))
+                            {
+                                strcpy(imgName, json_object_get_string(jobjTmp));
+                            }
+                        }
+                    }
+                }
+                // Release the JSON object.
+                json_object_put(jobj);
+            }
+        }
+        if (matchfound == 1)
+            break;
+    }
+
+    closedir(dp);
+
+    free(drev);
+
+    if (matchfound == 1)
+        return 1;
+    else
+        return 0;
+}
+
+/**
  * Draw a single host into an image bitmap
  * @param [in]  host    host to be drawn
  * @param [in]  d       bitmap data. assumes three channel (RBG)
@@ -232,6 +389,8 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         return;
     }
 
+    //hostImg(host);
+
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.
 
@@ -249,6 +408,8 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         data = stbi_load("images/XR524-8C.jpg", &sprx, &spry, &sprn, 0);
     else if (strPos("xc208", sysDesc, 0) > -1)
         data = stbi_load("images/XC208.jpg", &sprx, &spry, &sprn, 0);
+    else if (strPos("xm416", sysDesc, 0) > -1)
+        data = stbi_load("images/XM416-4C.jpg", &sprx, &spry, &sprn, 0);
     else
         data = stbi_load("images/generic_switch.jpg", &sprx, &spry, &sprn, 0);
 

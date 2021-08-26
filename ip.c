@@ -19,6 +19,7 @@
  **********************************************************************/
 
 #include "ip.h"
+#include "strcommon.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,39 +27,6 @@
 
 struct ipRanges *parseIpRanges(char *input);
 char *ui2ip(unsigned int ipAsUInt);
-
-/*int main()
-{
-    char str[80];// = "192.168.4.0, 192.168.5.0-.255, 10.8.152.12/16";
-    printf("Enter the first value:");
-    scanf("%s", str);
-    printf("I read:%s\n",str);
-    int i;
-    struct ipRanges *result = parseIpRanges(str);
-
-    for (i = 0; i < result->n; i++)
-    {
-        printf("Result IP range %i from: %u [%s] to %u [%s]\n", i, result->ranges[i].lower, ui2ip(result->ranges[i].lower), result->ranges[i].upper, ui2ip(result->ranges[i].upper));
-    }
-
-    return 0;
-}*/
-
-/**
- * Reverses a string array */
-void reverse(char *c)
-{
-    int n = strlen(c);
-    int i, j;
-    char tmp;
-    for (i = 0, j = n - 1; i < j; i++, j--)
-    {
-        // swap characters from ends of the string and move towards centre.
-        tmp = c[i];
-        c[i] = c[j];
-        c[j] = tmp;
-    }
-}
 
 unsigned int ip2ui(char *ip)
 {

@@ -3,7 +3,7 @@ TARGET=zabbix-map		# name of output file is same as one of the internal .c libra
 JSONCDIR=/usr/local/include/json-c/		# Location of JSON C
 
 CFLAGS=-I$(JSONCDIR) -I.
-LIBS=-ljson-c -lcurl -lm
+LIBS=-ljson-c -lcurl -lm -lpcre
 
 all:	main.o zconn.o zmap.o Forests.o ip.o render.o
 	$(CC) main.c zconn.c zmap.c Forests.c ip.c render.c -o $(TARGET) $(CFLAGS) $(LIBS)
