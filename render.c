@@ -309,12 +309,12 @@ int hostImg(struct host *host, char *imgName)
                     json_object *jcheckname;
                     json_object *jcheckpcre;
 
-                    char *checkname[256];
-                    char *checkpcre[256];
+                    char checkname[256];
+                    char checkpcre[256];
                     char *image;
                     int checkCount; // How many PCRE checks are listed in the JSON file?
                     int i;
-                    if (json_object_object_get_ex(jobj, "interfaces", &jobjTmp))
+                    if (json_object_object_get_ex(jobj, "matches", &jobjTmp))
                     {
                         // IP addresses
                         checkCount = json_object_array_length(jobjTmp);
@@ -389,7 +389,15 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         return;
     }
 
-    //hostImg(host);
+
+    // TESTING
+    char *imagename = malloc(256);
+    hostImg(host, imagename);
+    free(imagename);
+    // TESTING
+
+
+
 
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.
