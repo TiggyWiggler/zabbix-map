@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <pcre.h>
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <dirent.h>
 #include "zdata.h"
 #include "render.h"
@@ -213,6 +214,7 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
 */
 int hostImg(struct host *host, char *imgName)
 {
+    char errmsg[120];
     char *drev = malloc(255); // entry->d_name reversed.
     struct dirent *entry;
     DIR *dp;
@@ -224,7 +226,7 @@ int hostImg(struct host *host, char *imgName)
         return 0;
     }
 
-    int matchfound; // We have found the name of the image file
+    int matchfound = 0; // We have found the name of the image file
 
     while ((entry = readdir(dp)))
     {
@@ -241,7 +243,7 @@ int hostImg(struct host *host, char *imgName)
             // 9. close file and return result.
 
             // 1. Reverse the string
-            strcpy(entry->d_name, drev);
+            strcpy(drev, entry->d_name);
             reverse(drev);
 
             // 2. get the first 5 characters
@@ -256,9 +258,11 @@ int hostImg(struct host *host, char *imgName)
                 struct hostCol ret; // Default NULL object
                 ret.count = 0;
                 ret.hosts = NULL;
+                char path[256] = "images//";
+                strncat(path, entry->d_name, 248);
 
                 /* open an existing file for reading */
-                infile = fopen(entry->d_name, "r");
+                infile = fopen(path, "r");
 
                 /* quit if the file does not exist */
                 if (infile == NULL)
@@ -329,6 +333,53 @@ int hostImg(struct host *host, char *imgName)
                                     strcpy(checkpcre, json_object_get_string(jcheckpcre));
                                     // 6. test the string using the PCRE library (already included) against the current host
                                     // http://www.pcre.org/current/doc/html/
+
+                                    pcre2_code_8 *re;
+                                    PCRE2_SIZE erroffset;
+                                    int errorcode;
+                                    re = pcre2_compile_8(
+                                        checkpcre,             /* the pattern */
+                                        PCRE2_ZERO_TERMINATED, /* the pattern is zero-terminated */
+                                        0,                     /* default options */
+                                        &errorcode,            /* for error code */
+                                        &erroffset,            /* for error offset */
+                                        NULL);                 /* no compile context */
+
+                                    if (re == NULL)
+                                    {
+                                        // Display error message.
+
+                                        pcre2_get_error_message_8(errorcode, errmsg, 120);
+                                        fprintf(stderr, "%s", errmsg);
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        if (strcmp(checkname, "sysDesc") == 0)
+                                        {
+                                            pcre2_match_data *md = pcre2_match_data_create(4, NULL);
+                                            int rc = pcre2_match(
+                                                re,                    /* result of pcre2_compile() */
+                                                host->sysDesc,         /* the subject string */
+                                                PCRE2_ZERO_TERMINATED, /* the length of the subject string */
+                                                0,                     /* start at offset 0 in the subject */
+                                                0,                     /* default options */
+                                                md,                    /* the match data block */
+                                                NULL);                 /* a match context; NULL means use defaults */
+
+                                            pcre2_match_data_free(md);
+
+                                            if (rc == 0)
+                                                matchfound = 1;
+                                            else if (rc != PCRE2_ERROR_NOMATCH)
+                                            {
+                                                pcre2_get_error_message_8(rc, errmsg, 120);
+                                                fprintf(stderr, "%s", errmsg);
+                                                return 0;
+                                            }
+                                        }
+                                    }
+                                    pcre2_code_free_8(re);
                                 }
                         }
 
@@ -389,15 +440,11 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         return;
     }
 
-
     // TESTING
     char *imagename = malloc(256);
     hostImg(host, imagename);
     free(imagename);
     // TESTING
-
-
-
 
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.

@@ -1,6 +1,6 @@
 {
 	"matches":[
-		{"name":"sysDesc","pcre":"(?i)xm416"}
+		{"name":"sysDesc","pcre":"/(?i)xm416/gm"}
 	],
 	"image":"XM416-4C.jpg"
 }
