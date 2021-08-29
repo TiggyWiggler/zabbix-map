@@ -465,7 +465,6 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
     
     data = stbi_load(path, &sprx, &spry, &sprn, 0);
 
-
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.
 
