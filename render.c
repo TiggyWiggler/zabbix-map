@@ -212,9 +212,9 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
 /**
  * Return the file name of the image to be used for a given host.
 */
-int hostImg(struct host *host, char *imgName)
+int hostImg(struct host *host, char *dir, char *imgName)
 {
-    char errmsg[120];
+    
     char *drev = malloc(255); // entry->d_name reversed.
     struct dirent *entry;
     DIR *dp;
@@ -227,6 +227,7 @@ int hostImg(struct host *host, char *imgName)
     }
 
     int matchfound = 0; // We have found the name of the image file
+    PCRE2_UCHAR *errmsg[120];
 
     while ((entry = readdir(dp)))
     {
@@ -334,10 +335,10 @@ int hostImg(struct host *host, char *imgName)
                                     // 6. test the string using the PCRE library (already included) against the current host
                                     // http://www.pcre.org/current/doc/html/
 
-                                    pcre2_code_8 *re;
+                                    pcre2_code *re;
                                     PCRE2_SIZE erroffset;
                                     int errorcode;
-                                    re = pcre2_compile_8(
+                                    re = pcre2_compile(
                                         checkpcre,             /* the pattern */
                                         PCRE2_ZERO_TERMINATED, /* the pattern is zero-terminated */
                                         0,                     /* default options */
@@ -348,9 +349,8 @@ int hostImg(struct host *host, char *imgName)
                                     if (re == NULL)
                                     {
                                         // Display error message.
-
-                                        pcre2_get_error_message_8(errorcode, errmsg, 120);
-                                        fprintf(stderr, "%s", errmsg);
+                                        pcre2_get_error_message(errorcode, *errmsg, 120);
+                                        fputs(*errmsg,stderr);
                                         return 0;
                                     }
                                     else
@@ -361,7 +361,7 @@ int hostImg(struct host *host, char *imgName)
                                             int rc = pcre2_match(
                                                 re,                    /* result of pcre2_compile() */
                                                 host->sysDesc,         /* the subject string */
-                                                PCRE2_ZERO_TERMINATED, /* the length of the subject string */
+                                                strlen(host->sysDesc), /* the length of the subject string */
                                                 0,                     /* start at offset 0 in the subject */
                                                 0,                     /* default options */
                                                 md,                    /* the match data block */
@@ -369,21 +369,22 @@ int hostImg(struct host *host, char *imgName)
 
                                             pcre2_match_data_free(md);
 
-                                            if (rc == 0)
+                                            if (rc > 0)
                                                 matchfound = 1;
                                             else if (rc != PCRE2_ERROR_NOMATCH)
                                             {
-                                                pcre2_get_error_message_8(rc, errmsg, 120);
-                                                fprintf(stderr, "%s", errmsg);
+                                                
+                                                pcre2_get_error_message(rc, *errmsg, 120);
+                                                fputs(*errmsg,stderr);
                                                 return 0;
                                             }
                                         }
                                     }
-                                    pcre2_code_free_8(re);
+                                    pcre2_code_free(re);
                                 }
                         }
 
-                        if (matchfound = 1)
+                        if (matchfound == 1)
                         {
                             // 8. if match then get the value for the image file name
                             if (json_object_object_get_ex(jobj, "image", &jobjTmp))
@@ -440,16 +441,35 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         return;
     }
 
-    // TESTING
-    char *imagename = malloc(256);
-    hostImg(host, imagename);
+    // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
+    // 'generalise' this if I even put this into production, along with caching images between calls etc.
+    char dir[20] = "images";
+    char *imagename = calloc(1,256);
+    char path[256];
+    path[0] = '\0';
+    hostImg(host, dir, imagename);
+    if (strlen(imagename)==0)
+    {
+        // No image name was returned, so apply the default image.
+        strcpy(imagename,"generic_switch.jpg");
+    }
+    if (strlen(dir)>0)
+    {
+        strcat(path,dir);
+        strcat(path,"/");
+            }
+
+    strcat(path,imagename);
+    
     free(imagename);
-    // TESTING
+    
+    data = stbi_load(path, &sprx, &spry, &sprn, 0);
+
 
     // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
     // 'generalise' this if I even put this into production, along with caching images between calls etc.
 
-    sysDesc = malloc(strlen(host->sysDesc) + 1);
+    /*sysDesc = malloc(strlen(host->sysDesc) + 1);
     memset(sysDesc, '\0', 1);
     if (strlen(host->sysDesc) > 0)
         strcpy(sysDesc, host->sysDesc); // Copy System Description
@@ -468,7 +488,7 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
     else
         data = stbi_load("images/generic_switch.jpg", &sprx, &spry, &sprn, 0);
 
-    free(sysDesc);
+    free(sysDesc);*/
 
     // Set resize target based on target bounding box.
     srcar = (float)sprx / spry;
