@@ -211,6 +211,9 @@ void writeText(char *text, char *d, unsigned int w, unsigned int h, unsigned int
 
 /**
  * Return the file name of the image to be used for a given host.
+ * This is just an awful implementation without any intelligence of caching of retrieved results.
+ * At some point I will need to cache the results and also pull the position of the individual ports
+ * but that is for another day.
 */
 int hostImg(struct host *host, char *dir, char *imgName)
 {
@@ -441,8 +444,7 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
         return;
     }
 
-    // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
-    // 'generalise' this if I even put this into production, along with caching images between calls etc.
+    // Load the switch image. 
     char dir[20] = "images";
     char *imagename = calloc(1,256);
     char path[256];
@@ -464,30 +466,6 @@ void drawHost(struct host *host, char *d, unsigned int w, unsigned int h, int x,
     free(imagename);
     
     data = stbi_load(path, &sprx, &spry, &sprn, 0);
-
-    // Load the switch image. Really dumb hardcoded solution here just to see if everything works. I will need to
-    // 'generalise' this if I even put this into production, along with caching images between calls etc.
-
-    /*sysDesc = malloc(strlen(host->sysDesc) + 1);
-    memset(sysDesc, '\0', 1);
-    if (strlen(host->sysDesc) > 0)
-        strcpy(sysDesc, host->sysDesc); // Copy System Description
-
-    for (i = 0; sysDesc[i]; i++)
-        sysDesc[i] = tolower(sysDesc[i]); // Convert System Description to lower
-
-    if (strPos("xc206", sysDesc, 0) > -1)
-        data = stbi_load("images/XC206-2SFP_96.jpg", &sprx, &spry, &sprn, 0);
-    else if (strPos("xr524", sysDesc, 0) > -1)
-        data = stbi_load("images/XR524-8C.jpg", &sprx, &spry, &sprn, 0);
-    else if (strPos("xc208", sysDesc, 0) > -1)
-        data = stbi_load("images/XC208.jpg", &sprx, &spry, &sprn, 0);
-    else if (strPos("xm416", sysDesc, 0) > -1)
-        data = stbi_load("images/XM416-4C.jpg", &sprx, &spry, &sprn, 0);
-    else
-        data = stbi_load("images/generic_switch.jpg", &sprx, &spry, &sprn, 0);
-
-    free(sysDesc);*/
 
     // Set resize target based on target bounding box.
     srcar = (float)sprx / spry;
