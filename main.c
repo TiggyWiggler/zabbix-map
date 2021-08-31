@@ -206,6 +206,8 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
+                free(ips->ranges);
+                free(ips);
             }
         }
 

@@ -69,7 +69,7 @@ char *ui2ip(unsigned int ipAsUInt)
 
 unsigned int createBitmask(const char *bitmask)
 {
-    unsigned int times = (unsigned int)atol(bitmask) - 1, i, bitmaskAsUInt = 1;
+    unsigned int times = (unsigned int)atol(bitmask) , i, bitmaskAsUInt = 0;
     /* Fill in set bits (1) from the right. */
     for (i = 0; i < times; ++i)
     {
@@ -77,7 +77,7 @@ unsigned int createBitmask(const char *bitmask)
         bitmaskAsUInt |= 1;
     }
     /* Shift in unset bits from the right. */
-    for (i = 0; i < 32 - times - 1; ++i)
+    for (i = 0; i < 32 - times; ++i)
         bitmaskAsUInt <<= 1;
     return bitmaskAsUInt;
 }
