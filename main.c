@@ -25,7 +25,6 @@
 #include "zconn.h"
 #include "Forests.h"
 #include "ip.h"
-#include "render.h"
 
 struct methodCol
 {
@@ -253,7 +252,7 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(out, "bmp") == 0)
             {
-                renderHL(hlPtr, &pads);
+                 puts("-out bmp NOT IMPLEMENTED.\n");
             }
 
             freeHostCol(&(hlPtr->hosts));
@@ -402,7 +401,7 @@ void showHelp()
     printf("\t\t\tif api then resultant map is sent to Zabbix\n");
     printf("\t\t\tif bmp then resultant map is output as a bitmap file in the local folder\n");
     printf("\t\t\tbitmap renderer is entirely internal to this code so do not expect it to be comparible\n");
-    printf("\t\t\tto the Zabbix rendered map.\n");
+    printf("\t\t\tto the Zabbix rendered map. NOT IMPLEMENTED IN THIS CLONE! See zabbix-map-with-render\n");
     printf(" -cache\t\t\tname of the cache file.\n");
     printf(" -orderby\t\tOne or more order by values. Used to order host nodes.\n");
     printf("\t\t\tdescendants: order by number of descendants at all levels below subject node.\n");
