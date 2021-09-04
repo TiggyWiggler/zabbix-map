@@ -178,8 +178,8 @@ example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admi
 			children: order by number of children at one level below subject node.<br/>
 			generations: order by number levels (generations) below subject node.<br/>
 			For any order value suffix 'Desc' to reverse order. <br/>
-			Chain multiple orders with spaces. <br/>
-			example: <code>-orderby "descendants childrenDesc"</code></td>
+			Chain multiple orders with commas. <br/>
+			example: <code>-orderby "descendants,childrenDesc"</code></td>
 		</tr>
 		<tr>	
 			<td>-padding</td>

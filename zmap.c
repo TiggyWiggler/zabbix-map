@@ -63,55 +63,60 @@ struct linkCol findAllLinks(struct hostCol *hosts)
 
     for (i = 0; i < hosts->count; i++)
     {
-        for (j = 0; j < hosts->hosts[i].devicesCount; j++)
-        {
-            // Check for space
-            if (size == ret.count)
+        if (strlen(hosts->hosts[i].chassisId) > 0)
+            for (j = 0; j < hosts->hosts[i].devicesCount; j++)
             {
-                // Increase size of return variable
-                size += 10;
-                linkColTmp = realloc(ret.links, size * sizeof(struct link));
-                if (linkColTmp)
-                    ret.links = linkColTmp;
-                else
+                if (strlen(hosts->hosts[i].linkedDevices[j].remChassisId) > 0)
                 {
-                    fprintf(stderr, "Out of memory attempting to create space for host link");
-                    return ret;
+
+                    // Check for space
+                    if (size == ret.count)
+                    {
+                        // Increase size of return variable
+                        size += 10;
+                        linkColTmp = realloc(ret.links, size * sizeof(struct link));
+                        if (linkColTmp)
+                            ret.links = linkColTmp;
+                        else
+                        {
+                            fprintf(stderr, "Out of memory attempting to create space for host link");
+                            return ret;
+                        }
+                    }
+                    // Build the link data.
+                    a = &(ret.links[ret.count].a);
+                    b = &(ret.links[ret.count].b);
+                    ld = &(hosts->hosts[i].linkedDevices[j]);
+                    a->hostId = hosts->hosts[i].id;
+                    b->hostId = 0;
+                    strcpy(a->chassisId, hosts->hosts[i].chassisId);
+                    strcpy(a->portRef, ld->locPortName);
+
+                    strcpy(b->chassisId, ld->remChassisId);
+                    strcpy(b->portRef, ld->remPortId);
+
+                    char *leftStrTmp = {0};
+                    char *rightStrTmp = stripSeparators(b->chassisId);
+
+                    // Try to find a host that matches the other side of the equation.
+                    for (k = 0; k < hosts->count; k++)
+                    {
+                        leftStrTmp = stripSeparators(hosts->hosts[k].chassisId);
+
+                        if (strcmp(leftStrTmp, rightStrTmp) == 0)
+                        {
+                            // match found
+                            b->hostId = hosts->hosts[k].id;
+                            free(leftStrTmp);
+                            break;
+                        }
+
+                        free(leftStrTmp);
+                    }
+                    free(rightStrTmp);
+                    ret.count++;
                 }
             }
-            // Build the link data.
-            a = &(ret.links[ret.count].a);
-            b = &(ret.links[ret.count].b);
-            ld = &(hosts->hosts[i].linkedDevices[j]);
-            a->hostId = hosts->hosts[i].id;
-            b->hostId = 0;
-            strcpy(a->chassisId, hosts->hosts[i].chassisId);
-            strcpy(a->portRef, ld->locPortName);
-
-            strcpy(b->chassisId, ld->remChassisId);
-            strcpy(b->portRef, ld->remPortId);
-
-            char *leftStrTmp = {0};
-            char *rightStrTmp = stripSeparators(b->chassisId);
-
-            // Try to find a host that matches the other side of the equation.
-            for (k = 0; k < hosts->count; k++)
-            {
-                leftStrTmp = stripSeparators(hosts->hosts[k].chassisId);
-
-                if (strcmp(leftStrTmp, rightStrTmp) == 0)
-                {
-                    // match found
-                    b->hostId = hosts->hosts[k].id;
-                    free(leftStrTmp);
-                    break;
-                }
-
-                free(leftStrTmp);
-            }
-            free(rightStrTmp);
-            ret.count++;
-        }
     }
 
     /* Remove connections in two directions (where a==>b and b==>a).

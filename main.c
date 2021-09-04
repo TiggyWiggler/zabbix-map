@@ -41,7 +41,7 @@ void parseSpacing(char *s, double spaces[2]);
 int main(int argc, char *argv[])
 {
     char map[80] = "No name map";
-    char ip[80] = "0.0.0.0/0";
+    char ip[255] = "0.0.0.0/0";
     char src[10] = "api";
     char cache[25] = "";
     char sortStr[30] = "1"; //descendantsDesc
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
             // Parameter names
             if (strcmp(argv[i], "-map") == 0)
                 cptr = &map[0];
-            else if (strcmp(argv[i], "-ip") == 0)
+            else if (strncmp(argv[i], "-ip", 255) == 0)
                 cptr = &ip[0];
             else if (strcmp(argv[i], "-src") == 0)
                 cptr = &src[0];
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         {
             // Parameter values
             if (cptr)
-                strcpy(cptr, argv[i]);
+                strcpy(cptr, argv[i]);      // TODO: Overflow possible here as this is not using strncpy. Need to refractor this section of code.
         }
     }
 
@@ -331,29 +331,29 @@ void parseSorts(char *s, struct methodCol *mc)
             mc->sm = tmpPtr;
         }
 
-        if (strcmp(tok, "descendants"))
-        {
-            mc->sm[mc->n++] = descendants;
-        }
-        else if (strcmp(tok, "descendantsDesc"))
+        if (strcmp(tok, "descendantsDesc")==0)
         {
             mc->sm[mc->n++] = descendantsDesc;
         }
-        else if (strcmp(tok, "children"))
+        else if (strcmp(tok, "descendants")==0)
         {
-            mc->sm[mc->n++] = children;
+            mc->sm[mc->n++] = descendants;
         }
-        else if (strcmp(tok, "childrenDesc"))
+        else if (strcmp(tok, "childrenDesc")==0)
         {
             mc->sm[mc->n++] = childrenDesc;
         }
-        else if (strcmp(tok, "generations"))
+        else if (strcmp(tok, "children")==0)
         {
-            mc->sm[mc->n++] = generations;
+            mc->sm[mc->n++] = children;
         }
-        else if (strcmp(tok, "generationsDesc"))
+        else if (strcmp(tok, "generationsDesc")==0)
         {
             mc->sm[mc->n++] = generationsDesc;
+        }
+        else if (strcmp(tok, "generations")==0)
+        {
+            mc->sm[mc->n++] = generations;
         }
 
         tok = strtok(NULL, delim);
@@ -410,8 +410,8 @@ void showHelp()
     printf("\t\t\tchildren: order by number of children at one level below subject node.\n");
     printf("\t\t\tgenerations: order by number levels (generations) below subject node.\n");
     printf("\t\t\tFor any order value suffix 'Desc' to reverse order. \n");
-    printf("\t\t\tChain multiple orders with spaces. \n");
-    printf("\t\t\texample: -orderby \"descendants childrenDesc\"\n");
+    printf("\t\t\tChain multiple orders with commas. \n");
+    printf("\t\t\texample: -orderby \"descendants,childrenDesc\"\n");
     printf(" -padding\t\tpadding of each tree. Applied to sides counter clockwise from north position.\n");
     printf("\t\t\tFour values required if given. comma separated example: -padding \"100.0, 50.0, 100.0, 50.0\"\n");
     printf(" -nodespace\t\tSpacing between nodes within the map. Assumes nodes have zero size themselves.\n");
