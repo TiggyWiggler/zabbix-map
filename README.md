@@ -130,6 +130,8 @@ option should be followed by option value if applicable. Use double quotes if va
 
 example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admin -p password1`
 
+See the GitHub Wiki for a more detailed explanation of each parameter including screen shots taken from worked examples.
+
 <table>
 	<thead>
 		<tr>
