@@ -190,12 +190,12 @@ example: `zabbix-map -map "test map" -ip "192.168.4.0\24, 192.168.4.101" -u admi
 			<td>Spacing between nodes within the map. Assumes nodes have zero size themselves. Two values required if given. X axis first, Y axis second.<br/>example: <code>-nodespace "100.0, 50.0"</code></td>
 		</tr>
 		<tr>
-			<td>Pseudo Hosts</td>
-			<td>Pseudo hosts are devices found via the LLDP record of a given device, but not present in the Zabbix dataset. Default value is 1. If 1 is set then pseudo hosts are included in the generated map, if 0 then pseudo hosts are not included.</td>
+			<td>-phosts</td>
+			<td>Pseudo Hosts. Pseudo hosts are devices found via the LLDP record of a given device, but not present in the Zabbix dataset. Default value is 1. If 1 is set then pseudo hosts are included in the generated map, if 0 then pseudo hosts are not included.</td>
 		</tr>
 		<tr>
-			<td>Pseudo Hubs</td>
-			<td>Pseudo hubs are used to represent multiple links to a single port or unspecified port. Default value is 1. If 1 is set then pseudo hubs are included in the generated map, if 0 then pseudo hubs are not included.</td>
+			<td>-phubs</td>
+			<td>Pseudo Hubs. Pseudo hubs are used to represent multiple links to a single port or unspecified port. Default value is 1. If 1 is set then pseudo hubs are included in the generated map, if 0 then pseudo hubs are not included.</td>
 		</tr>
 		<tr>	
 			<td>-u</td>
