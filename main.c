@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     char out[4] = "api"; // output. api=Zabbix API (map), bmp = bitmap image
     char phubs[2] = "1";          // pseudo hubs 1=true, 0=false.
     char phosts[2] = "1";         // pseudo hosts 1=true, 0=false
+    char linklabels[2] = "0";     // labels on links. 1=true, 0=false.
     char *cptr = NULL;
     int h = 0; // show help.
     int i, j, k;
@@ -86,12 +87,14 @@ int main(int argc, char *argv[])
                 cptr = &debug[0];
             else if (strcmp(argv[i], "-ep") == 0)
                 cptr = &ep[0];
-                else if (strcmp(argv[i], "-phubs") == 0)
+            else if (strcmp(argv[i], "-phubs") == 0)
                 cptr = &phubs[0];
-                else if (strcmp(argv[i], "-phosts") == 0)
+            else if (strcmp(argv[i], "-phosts") == 0)
                 cptr = &phosts[0];
             else if (strcmp(argv[i], "-out") == 0)
                 cptr = &out[0];
+            else if (strcmp(argv[i], "-ll") == 0)
+                cptr = &linklabels[0];
             else if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "--h") == 0) || (strcmp(argv[i], "--?") == 0) || (strcmp(argv[i], "--help") == 0))
                 // help required
                 h = 1;
@@ -117,6 +120,9 @@ int main(int argc, char *argv[])
         printf("Output: %s\n", out);
         printf("Username: %s\n", user);
         printf("Password: %s\n", pw);
+        printf("LinkLabels: %s\n", linklabels);
+        printf("Pseudo Hubs: %s\n", phubs);
+        printf("Pseudo Hosts: %s\n", phosts);
     }
 
     if (h)
@@ -250,7 +256,7 @@ int main(int argc, char *argv[])
                 zconnDeleteMapByName(map);
 
                 // Write the map into Zabbix
-                createMap(hlPtr, map, xMax, yMax);
+                createMap(hlPtr, map, xMax, yMax, strncmp(linklabels, "1", 1) == 0 ? 1 : 0);
             }
             else if (strcmp(out, "bmp") == 0)
             {
@@ -419,4 +425,7 @@ void showHelp()
     printf("\t\t\texample: -nodespace \"100.0, 50.0\"\n");
     printf(" -u\t\t\tUsername to be used for the connection to Zabbix server.\n");
     printf(" -p\t\t\tPassword to be used for the given Zabbix server user.\n");
+    printf(" -phosts\t\t\tHosts that are found though LLDP but are not in the Zabbix database will be represented on the map.\n");
+    printf(" -phubs\t\t\tIf more than two hosts are connected through the same link show a hub at the joining section.\n");
+    printf(" -ll\t\t\tLinks between hosts labelled to show port assignments.\n");
 }

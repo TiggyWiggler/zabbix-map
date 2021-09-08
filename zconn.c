@@ -719,8 +719,9 @@ struct hostCol zconnGetHostsFromAPI(char *cacheFile)
  * @param [in] name     name of the map 
  * @param [in] w        width of the map
  * @param [in] h        height of the map
+ * @param [in] linkLabels   if 1 then links will contain labels
  * @return              SysID - ID of the map that is created*/
-int createMap(struct hostLink *hl, char *name, double w, double h)
+int createMap(struct hostLink *hl, char *name, double w, double h, int linkLabels)
 {
     int i;
     int intMaxLen = 17;     // Maximum length of a string representation of an integer
@@ -782,13 +783,91 @@ int createMap(struct hostLink *hl, char *name, double w, double h)
     for (i = 0; i < hl->links.count; i++)
     {
         struct link *l = &hl->links.links[i];
-
+        
         // Create the link
         json_object *link = json_object_new_object();
         snprintf(strTmp, intMaxLen, "%i", l->a.hostId);
         json_object_object_add(link, "selementid1", json_object_new_string(strTmp));
         snprintf(strTmp, intMaxLen, "%i", l->b.hostId);
         json_object_object_add(link, "selementid2", json_object_new_string(strTmp));
+
+        // Add the label to the link
+        if(linkLabels==1)
+        {
+            int labelMaxLen = 256;
+            int j;
+            char label[labelMaxLen + 1];
+            memset(label, '\0',257);
+            struct host *ha, *hb;   // Hosts a and b
+
+            // Get a pointer to the two hosts referenced in this link
+            for (j=0;j<hl->hosts.count;j++)
+            if (hl->hosts.hosts[j].id==l->a.hostId)
+                {
+                    ha = &hl->hosts.hosts[j];
+                    break;
+                }
+
+            for (j=0;j<hl->hosts.count;j++)
+            if (hl->hosts.hosts[j].id==l->b.hostId)
+                {
+                    hb = &hl->hosts.hosts[j];
+                    break;
+                }
+
+
+
+            /*int i;
+            for (i=0;i<hl->hosts.count;i++)
+            {
+                if(hl->hosts.hosts[i].id == l->a.hostId)
+                {
+                    // Add the host name from side a
+                    strncat(label,hl->hosts.hosts[i].name,labelMaxLen-strlen(label));
+                    break;
+                }
+            }*/
+
+            //strncat(label,l->a.chassisId,labelMaxLen-strlen(label));
+            strncat(label," [",labelMaxLen-strlen(label));
+
+            // Place the ports in the correct order in the labels negating the need to put the host names on the links too (takes up too much space).
+            if(ha->yPos<hb->yPos)
+                strncat(label,l->a.portRef,labelMaxLen-strlen(label));
+            else if (ha->yPos>hb->yPos)
+                strncat(label,l->b.portRef,labelMaxLen-strlen(label));
+            else if (ha->xPos<hb->yPos)
+                strncat(label,l->a.portRef,labelMaxLen-strlen(label));
+            else 
+                strncat(label,l->b.portRef,labelMaxLen-strlen(label));
+
+            strncat(label,"]\n<->\n",labelMaxLen-strlen(label));
+            //strncat(label,l->b.chassisId,labelMaxLen-strlen(label));
+
+            /*for (i=0;i<hl->hosts.count;i++)
+            {
+                if(hl->hosts.hosts[i].id == l->b.hostId)
+                {
+                    // Add the host name from side b
+                    strncat(label,hl->hosts.hosts[i].name,labelMaxLen-strlen(label));
+                    break;
+                }
+            }*/
+
+            strncat(label," [",labelMaxLen-strlen(label));
+            // Place the ports in the correct order in the labels negating the need to put the host names on the links too (takes up too much space).
+            if(ha->yPos<hb->yPos)
+                strncat(label,l->b.portRef,labelMaxLen-strlen(label));
+            else if (ha->yPos>hb->yPos)
+                strncat(label,l->a.portRef,labelMaxLen-strlen(label));
+            else if (ha->xPos<hb->yPos)
+                strncat(label,l->b.portRef,labelMaxLen-strlen(label));
+            else 
+                strncat(label,l->a.portRef,labelMaxLen-strlen(label));
+
+            strncat(label,"]",labelMaxLen-strlen(label));
+            json_object_object_add(link, "label", json_object_new_string(label));
+        }
 
         json_object_array_add(links, link); // Add this link to the links array.
     }

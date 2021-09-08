@@ -58,7 +58,7 @@ struct host zconnNewHost();
 void freeHostCol(struct hostCol *hosts);
 struct hostCol zconnGetHostsFromFile(char *fileName);
 struct hostCol zconnGetHostsFromAPI(char *cacheFile);
-int createMap(struct hostLink *hl, char *name, double w, double h);
+int createMap(struct hostLink *hl, char *name, double w, double h, int linkLabels);
 
 #endif
 

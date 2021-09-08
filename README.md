@@ -199,6 +199,11 @@ See the GitHub Wiki for a more detailed explanation of each parameter including 
 			<td>-phubs</td>
 			<td>Pseudo Hubs. Pseudo hubs are used to represent multiple links to a single port or unspecified port. Default value is 1. If 1 is set then pseudo hubs are included in the generated map, if 0 then pseudo hubs are not included.</td>
 		</tr>
+		<tr>
+			<td>-ll</td>
+			<td>Link Labels. Where set to 1 (default=0) all links will be populated with labels that show the port assignments between the
+			hosts.</td>
+		</tr>
 		<tr>	
 			<td>-u</td>
 			<td>Username to be used for the connection to Zabbix server. Plaintext.</td>
