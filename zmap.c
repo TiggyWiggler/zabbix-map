@@ -176,6 +176,8 @@ int zconnFreeId(struct hostCol *hosts)
 
 struct hostCol *addPseudoHosts(struct hostCol *hosts, struct linkCol *links)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: addPseudoHosts\n");
     // Add hosts where we know a host should exist even if it is not present in the original data.
     int i, j;                // loop itterator
     int size = hosts->count; // we assume that the hosts is sized to its current count and realloc from that.
@@ -285,6 +287,9 @@ void addPseudoHubs(struct hostLink *hostsLinks)
     struct link *newLink;                    // pointer to new link that is created at the end of creating a hub for the final (root) connection.
     int hostsSize = hostsLinks->hosts.count; // Assume hosts collection is allocated to the current count.
     int linksSize = hostsLinks->links.count; // assume links colletion is allocated to the current count.
+
+    if (g_zDebugMode)
+            printf("DEBUG: addPseudoHubs/n");
 
     if (hostsLinks->links.count < 2)
         return;
@@ -497,6 +502,9 @@ struct hostLink *mapHosts(struct hostLink *hl, int phubs, int phosts)
  * */
 struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: hostLinkToForest\n");
+
     if (hl->hosts.count == 0)
         return f;
 

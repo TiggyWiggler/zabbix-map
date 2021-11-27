@@ -23,6 +23,8 @@
 #include <math.h>
 #include "Forests.h"
 
+extern int g_zDebugMode;    // GLOBAL debugging mode for zabbix-map.
+
 enum side
 {
     left,
@@ -158,6 +160,10 @@ void freeForest(forest *f)
     int i;
     int x;
     tree t;
+
+    if (g_zDebugMode)
+            printf("DEBUG: freeForest\n");
+
     for (i = 0; i <= f->treeCount - 1; i++)
     {
         t = f->trees[i];
@@ -1412,8 +1418,12 @@ void layoutForest(forest *f, enum sortMethods methods[], int methodCount, double
     // methodCount is the number of elements in the array
     // nodeX is the internode spacing on the X axis
     // nodeY is the internode spacing on the Y axis
-    // padding is the padding assigned to each tree. Array elements start at 12 o'clock position and move in a clockwise direction such that padding[3] is the 9 o'clock position.
+    // padding is the padding assigned to each tree. Array elements start at 12 o'clock position and move in a clockwise direction such that padding[3] is the 9 o'clock position.   
     int i; // loop itterator
+
+    if (g_zDebugMode)
+            printf("DEBUG: layoutForest\n");
+
     if (f->treeCount == 0)
         return;
 
@@ -1432,6 +1442,10 @@ void printTree(tree *t)
     int levelMin, levelMax;
     int generations;
     int errCount; // error counter
+
+    if (g_zDebugMode)
+            printf("DEBUG: printTree\n");
+
     if (!t)
     {
         printf("Tree pointer invalid");

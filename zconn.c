@@ -100,6 +100,8 @@ int instr(char *tofind, char *findin, uint start)
  * */
 json_object *zconnResp(char *method, json_object *params)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: zconnResp [%s]\n",method);
     /* an authentication string would look like this  "{\"jsonrpc\": \"2.0\",\"method\": \"user.login\",\"params\": {\"user\": \"Admin\",\"password\": \"zabbix\"},\"id\": 1,\"auth\": null}";*/
     static int connId = 0;             // private connection ID. Ensures that API response matches request.*/
     static char authId[40];            // Authorisation ID
@@ -333,6 +335,8 @@ void zconnDeleteMapById(int id)
 
 void zconnDeleteMapByName(char *name)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: zconnDeleteMapByName [%s]\n",name);
     // Delete map by name
     struct zMapCol maps = zconnGetMaps();
     int i; // loop itterator
@@ -729,6 +733,8 @@ struct hostCol zconnGetHostsFromAPI(char *cacheFile)
  * @return              SysID - ID of the map that is created*/
 int createMap(struct hostLink *hl, char *name, double w, double h, int linkLabels)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: createMap [%s]\n",name);
     int i;
     int intMaxLen = 17;     // Maximum length of a string representation of an integer
     char strTmp[intMaxLen]; // String representation of a number
@@ -897,6 +903,8 @@ int createMap(struct hostLink *hl, char *name, double w, double h, int linkLabel
  * */
 void freeHostCol(struct hostCol *hosts)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: freeHostCol\n");
     int i; // loop itterator.
     if (hosts->count > 0)
     {
