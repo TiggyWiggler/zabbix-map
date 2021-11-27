@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "zmap.h"
-
+extern int g_zDebugMode;
 char *stripSeparators(char *input)
 {
     // Remove seperators from a string.
@@ -462,6 +462,8 @@ void printLinks(struct linkCol *links)
 
 struct hostLink *mapHosts(struct hostLink *hl, int phubs, int phosts)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: mapHosts\n");
     hl->links = findAllLinks(&(hl->hosts));
     if (phosts == 1)
         hl->hosts = *addPseudoHosts(&(hl->hosts), &(hl->links));
@@ -689,6 +691,8 @@ struct forest *hostLinkToForest(struct forest *f, struct hostLink *hl)
  * @param [in]  debug           output debugging information*/
 void layoutHosts(struct hostLink *hostsLinks, double hostXSpace, double hostYSpace, struct padding treePadding, enum sortMethods *sorts, int sortCount, _Bool debug)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: layoutHosts\n");
     int i, j, k;      // loop itterator
     int rootOrd;      // Ordinal position of the root node.
     int linkCount;    // number of links for the root node.

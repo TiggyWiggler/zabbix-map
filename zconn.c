@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int g_zDebugMode;
+
 /**
  * Memory structure for JSON responses
  * */
@@ -601,6 +603,8 @@ struct hostCol zconnParseHosts(json_object *jhosts)
 
 struct hostCol zconnGetHostsFromFile(char *fileName)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: zconnGetHostsFromFile\n");
     /* declare a file pointer */
     FILE *infile;
     char *buffer;
@@ -663,6 +667,8 @@ struct hostCol zconnGetHostsFromFile(char *fileName)
 
 struct hostCol zconnGetHostsFromAPI(char *cacheFile)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: zconnGetHostsFromAPI\n");
     struct hostCol ret; // Default NULL object
     ret.count = 0;
     ret.hosts = NULL;

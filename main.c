@@ -38,6 +38,8 @@ struct padding parsePadding(char *s);
 void parseSorts(char *s, struct methodCol *mc);
 void parseSpacing(char *s, double spaces[2]);
 
+int g_zDebugMode = 0;     // GLOBAL debug mode
+
 int main(int argc, char *argv[])
 {
     char map[80] = "No name map";
@@ -108,6 +110,12 @@ int main(int argc, char *argv[])
     }
 
     if (strcmp(debug, "true") == 0)
+        {
+        g_zDebugMode = 1;       // set debug mode to on
+        printf("DEBUG: Debug Enabled\n");
+        }
+
+    if (g_zDebugMode)
     {
         printf("API End Point: %s\n", ep);
         printf("Map Name: %s\n", map);
@@ -132,7 +140,11 @@ int main(int argc, char *argv[])
         if (strlen(ep) > 0)
             setEndpoint(ep); // Change API endpoint if supplied. Otherwise default value used.
 
+        if (g_zDebugMode)
+            printf("DEBUG: About to authenticate\n");
         int authKey = zconnAuth(user, pw);
+        if (g_zDebugMode)
+            printf("DEBUG: Authentication complete\n");
         if (authKey == 0)
         {
             fprintf(stderr, "Authentication failed for user %s accessing Zabbix", user);
@@ -171,6 +183,8 @@ int main(int argc, char *argv[])
         }
 
         // check to see if the IP addresses on the host interfaces are within the limits of the ip ranges requested by the filter.
+        if (g_zDebugMode)
+            printf("DEBUG: About to check IP addresses\n");
         if (strlen(ip) > 0)
         {
             int ipasui;
@@ -216,7 +230,8 @@ int main(int argc, char *argv[])
                 free(ips);
             }
         }
-
+        if (g_zDebugMode)
+            printf("DEBUG: About to evaluate hosts\n");
         if (hl.hosts.count > 0)
         {
             for (i = 0; i < hl.hosts.count; i++)
@@ -284,6 +299,8 @@ int main(int argc, char *argv[])
  * */
 struct padding parsePadding(char *s)
 {
+    if (g_zDebugMode)
+            printf("DEBUG: parsePadding\n");
     struct padding p = {.bottom = 0, .left = 0, .right = 0, .top = 0}; // Return object with blank data
     char delim[2] = ",";
     char *token;
@@ -320,7 +337,8 @@ struct padding parsePadding(char *s)
  * */
 void parseSorts(char *s, struct methodCol *mc)
 {
-
+    if (g_zDebugMode)
+            printf("DEBUG: parseSorts\n");
     char delim[2] = ",";
     char *tok = strtok(s, delim);
     while (tok != NULL)
@@ -373,6 +391,8 @@ void parseSorts(char *s, struct methodCol *mc)
  * @param [in,out]  spaces  The two element array   */
 void parseSpacing(char *s, double spaces[2])
 {
+    if (g_zDebugMode)
+            printf("DEBUG: parseSpacing.\n");
     char delim[2] = ",";
     char *tok;
     int i = 0;
@@ -390,6 +410,8 @@ void parseSpacing(char *s, double spaces[2])
 
 void showHelp()
 {
+    if (g_zDebugMode)
+        printf("DEBUG: About to show help\n");
     // Show help to the user.
     printf("Zabbix Map generator by Craig Moore 2021.\n");
     printf("usage: zabbix-map [OPTION]...\n");
