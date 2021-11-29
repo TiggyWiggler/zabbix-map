@@ -168,7 +168,13 @@ json_object *zconnResp(char *method, json_object *params)
 
         curl_easy_setopt(curl, CURLOPT_URL, endpoint);
 
+        if (g_zDebugMode)
+            printf("DEBUG: zconnResp.curl_easy_perform [%s]\n",curl);
+
         res = curl_easy_perform(curl); /* post away! */
+
+        if (g_zDebugMode)
+            printf("DEBUG: zconnResp.curl_easy_perform complete\n");
 
         json_object_put(jobj); // free the memory so that we can use it again for the response.
 
@@ -180,6 +186,8 @@ json_object *zconnResp(char *method, json_object *params)
         }
         else
         {
+            if (g_zDebugMode)
+            printf("DEBUG: zconnResp.curl_easy_perform CURLE_OK\n");
             /*
             * Now, our chunk.memory points to a memory block that is chunk.size
             * and contains the response from the Zabbix API*/
@@ -202,6 +210,9 @@ json_object *zconnResp(char *method, json_object *params)
                 fprintf(stderr, "Error: %s\n", json_tokener_error_desc(jerr));
                 return NULL;
             }
+
+            if (g_zDebugMode)
+            printf("DEBUG: parseResult\n");
 
             // Debug print (uncomment line below to see all API responses).
             //printf("response:\n%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_PRETTY_TAB));
@@ -395,7 +406,8 @@ struct host zconnNewHost()
 struct hostCol zconnParseHosts(json_object *jhosts)
 {
     // Convert a JSON object representation of hosts into a struct hostCol (host collection) representation.
-
+    if (g_zDebugMode)
+            printf("DEBUG: zconnParseHosts\n");
     int intTmp;
     int i, j, k; // loop itterator.
     json_object *jhost;
