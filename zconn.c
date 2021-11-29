@@ -169,7 +169,7 @@ json_object *zconnResp(char *method, json_object *params)
         curl_easy_setopt(curl, CURLOPT_URL, endpoint);
 
         if (g_zDebugMode)
-            printf("DEBUG: zconnResp.curl_easy_perform [%s]\n",curl);
+            printf("DEBUG: zconnResp.curl_easy_perform\n");
 
         res = curl_easy_perform(curl); /* post away! */
 
@@ -199,6 +199,9 @@ json_object *zconnResp(char *method, json_object *params)
             int stringlen = chunk.size;
             int val_type;
             char *val_type_str;
+
+            if (g_zDebugMode)
+                printf("DEBUG: curl response: %s\n", mystring);
 
             do
             {
