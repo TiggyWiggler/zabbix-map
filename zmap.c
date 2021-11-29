@@ -289,7 +289,7 @@ void addPseudoHubs(struct hostLink *hostsLinks)
     int linksSize = hostsLinks->links.count; // assume links colletion is allocated to the current count.
 
     if (g_zDebugMode)
-            printf("DEBUG: addPseudoHubs/n");
+            printf("DEBUG: addPseudoHubs\n");
 
     if (hostsLinks->links.count < 2)
         return;
