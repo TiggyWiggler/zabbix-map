@@ -201,11 +201,21 @@ json_object *zconnResp(char *method, json_object *params)
             char *val_type_str;
 
             if (g_zDebugMode)
-                printf("DEBUG: curl response: %s\n", mystring);
+            {
+                if (stringlen < 5000)
+                {
+                    printf("DEBUG: curl response size: %i, curl response: %s\n", stringlen, mystring);
+                }
+                else
+                {
+                    printf("DEBUG: curl response size: %i\n", stringlen);
+                }
+            }
+                
 
+            stringlen++; // Include the '\0' if we know we're at the end of input
             do
             {
-                stringlen++; // Include the '\0' if we know we're at the end of input
                 jobj = json_tokener_parse_ex(tok, mystring, stringlen);
             } while ((jerr = json_tokener_get_error(tok)) == json_tokener_continue);
             if (jerr != json_tokener_success)
